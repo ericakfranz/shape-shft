@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "company": "Kestrel Mechanical",
+    "role": "Service Manager"
+  },
+  "template": "t2",
+  "name": "Teresa Halvorsen",
+  "title": "Service Manager | HVAC Service Lead | Technician Training",
+  "contact": "Brookhaven, MN | 555-555-0187 | t.halvorsen@example.com",
+  "summary": "Journeyman HVAC technician with more than nine years of residential and light commercial service at Kestrel Mechanical, including four years as lead technician. Trains and mentors apprentices, handles the hardest diagnostic calls, and has run dispatch during a January cold snap. Cut personal callbacks by about half with a pre-departure checklist that other technicians now use. Ready to lead the service team, support quality, and keep customers informed.",
+  "skills": [
+    {
+      "label": "Leadership",
+      "value": "apprentice training and mentoring, covering dispatch, prioritizing emergency calls, escalated customer concerns"
+    },
+    {
+      "label": "HVAC Service",
+      "value": "furnace, boiler, heat pump and air conditioning diagnostics and repair, combustion analysis, refrigerant handling"
+    },
+    {
+      "label": "Tools",
+      "value": "ServiceTitan (technician side), combustion analyzers, refrigerant gauges"
+    }
+  ],
+  "exp": [
+    {
+      "title": "Lead Service Technician",
+      "org": "Kestrel Mechanical | Brookhaven, MN",
+      "start": "03/2022",
+      "end": "Present",
+      "bullets": [
+        "Mentor apprentices on diagnosis and safety; three of four passed the journeyman exam on the first attempt.",
+        "Ran dispatch for two weeks during a January 2025 cold snap, putting no-heat calls first and calling customers directly when crews ran late.",
+        "Cut personal callback rate from about 8% to under 4% in one year with a 10-point pre-departure checklist that other technicians have adopted.",
+        "Handle the most difficult diagnostic calls, 4 to 6 service calls a day, for homes and small businesses."
+      ]
+    },
+    {
+      "title": "Service Technician",
+      "org": "Kestrel Mechanical | Brookhaven, MN",
+      "start": "04/2017",
+      "end": "03/2022",
+      "bullets": [
+        "Repaired and maintained furnaces, boilers and air conditioning systems; earned a journeyman license in 2020."
+      ]
+    }
+  ],
+  "edu": [
+    {
+      "name": "HVAC Technology Certificate",
+      "org": "Lakeshore Technical College",
+      "date": "2016"
+    }
+  ],
+  "certs": [
+    {
+      "name": "Journeyman HVAC License",
+      "date": "08/2020"
+    },
+    {
+      "name": "EPA Section 608 Universal Certification",
+      "date": "06/2017"
+    }
+  ],
+  "checks": {
+    "confirmedTerms": [
+      "ServiceTitan",
+      "dispatch",
+      "apprentices",
+      "mentoring",
+      "training",
+      "customer communication",
+      "journeyman",
+      "EPA 608"
+    ],
+    "doNotClaim": [
+      "hiring",
+      "budget",
+      "pricing",
+      "master license",
+      "ServiceTitan administration"
+    ],
+    "confirmedNumbers": [
+      "9",
+      "4",
+      "8",
+      "10",
+      "6",
+      "608"
+    ]
+  },
+  "map": [
+    {
+      "req": "5+ years of residential HVAC service experience",
+      "status": "covered",
+      "where": "Work Experience",
+      "note": "Since 04/2017."
+    },
+    {
+      "req": "Journeyman license required; EPA 608 Universal required",
+      "status": "covered",
+      "where": "Certifications",
+      "note": "Both held."
+    },
+    {
+      "req": "Experience training or leading other technicians",
+      "status": "covered",
+      "where": "Lead Service Technician bullet 1",
+      "note": "Four apprentices mentored."
+    },
+    {
+      "req": "Work with the service coordinator to schedule and dispatch calls",
+      "status": "partial",
+      "where": "Lead Service Technician bullet 2",
+      "note": "Two weeks covering dispatch; not ongoing."
+    },
+    {
+      "req": "Review service tickets for quality and follow up on callbacks",
+      "status": "partial",
+      "where": "Lead Service Technician bullet 3",
+      "note": "Own callback rate and checklist; has not reviewed others' tickets."
+    },
+    {
+      "req": "Track service department results and report to the owners monthly",
+      "status": "gap",
+      "where": "",
+      "note": "Has not reported department results. Interested in learning."
+    },
+    {
+      "req": "Strong customer communication",
+      "status": "covered",
+      "where": "Lead Service Technician bullet 2",
+      "note": "Called customers directly during the cold snap."
+    },
+    {
+      "req": "Comfortable with ServiceTitan",
+      "status": "covered",
+      "where": "Core Skills: Tools",
+      "note": "Technician side only, not administration."
+    }
+  ],
+  "posting": "Internal posting: Service Manager\n\nKestrel Mechanical is creating a Service Manager position to lead our service department as we grow.\n\nThe Service Manager will:\n- Lead and support our team of 9 service technicians and 3 apprentices\n- Work with the service coordinator to schedule and dispatch calls, putting emergencies first\n- Review service tickets for quality and follow up on callbacks\n- Train and mentor technicians and apprentices, and plan ongoing training\n- Handle escalated customer concerns\n- Track service department results and report to the owners monthly\n- Provide occasional field support on complex calls\n- Help with some evening and weekend on-call coordination\n\nWe are looking for:\n- 5+ years of residential HVAC service experience\n- Journeyman license required; EPA 608 Universal required\n- Experience training or leading other technicians\n- Strong customer communication\n- Comfortable with ServiceTitan\n- Interest in growing into a leadership role\n\nInterested employees should send a resume and a short letter to Gail by November 30.",
+  "letter": {
+    "greeting": "Dear Gail and Martin,",
+    "body": [
+      "I would like to be considered for the new Service Manager position. I have worked at Kestrel Mechanical since 2017 and as lead technician since 2022, and I would like to help the service team grow the way I have grown here.",
+      "The part of my job I value most is training. Three of the four apprentices I have mentored passed the journeyman exam on their first try. I also covered dispatch for two weeks during the January 2025 cold snap, so I have seen how the schedule looks from the office when every call is urgent.",
+      "I have not yet tracked results for the whole department or reported them, and I would want to learn that from you. I would also like to keep going out on the hardest calls when the team needs it. Thank you for considering me."
+    ],
+    "closing": "Thank you,"
+  }
+}
