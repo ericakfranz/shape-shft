@@ -1,0 +1,13 @@
+ShapeShft
+
+Open START-HERE.pdf to begin. If PDF files do not open on your device, open START-HERE.html in your web browser instead.
+
+ShapeShft is free and open source (MIT License). It helps you document your experience, make truthful job applications, and practice talking about your work out loud, using your own AI assistant.
+
+Folders:
+1-AI-Setup   Instructions for your AI assistant (set up once)
+2-Tools      The Resume Workbench and the Practice Guide Builder (open in a web browser)
+3-My-Files   Your own career files (start here empty)
+4-Prompts    Ready-to-use messages to send to your AI assistant
+5-Examples   Fictional examples so you can see what the results look like
+Help         Setup guides, troubleshooting and privacy information

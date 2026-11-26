@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShapeShft Practice Guide Builder</title>
+<style>
+:root{color-scheme:light;--bg:#f4f6f8;--card:#fff;--ink:#17222d;--muted:#4f5f6f;--line:#d0d9e1;--accent:#1d5f86;--accent-ink:#fff;--bad:#a3261c;--bad-soft:#fbe4e1;--good:#1c6b45;--good-soft:#e1f2e8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#10161c;--card:#18212a;--ink:#e6ebf0;--muted:#a3b0bd;--line:#2c3945;--accent:#8cc4e8;--accent-ink:#10161c;--bad:#f08a82;--bad-soft:#3a1a18;--good:#6cc59c;--good-soft:#14301f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding:0 16px 40px}
+main{max-width:980px;margin:0 auto}
+h1{font-size:1.6rem;margin:24px 0 4px}
+h2{font-size:1.15rem;margin:0 0 8px}
+p{margin:6px 0 12px}
+.lead{color:var(--muted);max-width:44rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0}
+ol.steps{margin:0;padding-left:1.3rem}
+ol.steps li{margin:4px 0}
+textarea{width:100%;min-height:260px;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+button{font:inherit;font-weight:600;border-radius:8px;padding:10px 16px;min-height:44px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button[disabled]{opacity:.5;cursor:not-allowed}
+label.opt{display:flex;gap:8px;align-items:flex-start;margin:6px 0}
+label.opt input{margin-top:5px;width:18px;height:18px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#msg{padding:10px 12px;border-radius:8px;margin-top:12px}
+#msg.bad{background:var(--bad-soft);color:var(--bad)}
+#msg.good{background:var(--good-soft);color:var(--good)}
+#msg:empty{display:none}
+iframe{width:100%;height:70vh;border:1px solid var(--line);border-radius:8px;background:#fff}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+details summary{cursor:pointer;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;border-bottom:1px solid var(--line);padding:6px;vertical-align:top}
+</style>
+</head>
+<body>
+<main>
+<h1>ShapeShft Practice Guide Builder</h1>
+<p class="lead">Turn the guide text from your AI coach into a practice guide you can open on your phone, even without internet. Everything happens on this device. Nothing is uploaded.</p>
+
+<div class="card">
+<h2>How it works</h2>
+<ol class="steps">
+<li>Ask your AI coach for an offline guide. For example: "Make me a 7-day offline practice guide." It replies with guide text in a box.</li>
+<li>Copy everything in that box and paste it below.</li>
+<li>Click <b>Preview</b> to check it, then <b>Download guide</b>.</li>
+<li>Open the downloaded file on your phone or computer. The Help folder explains how to move it to your phone.</li>
+</ol>
+</div>
+
+<div class="card">
+<h2><label for="src">Guide text</label></h2>
+<textarea id="src" spellcheck="false" placeholder="Paste the guide text from your AI coach here. It usually starts with a line like: Title: ..."></textarea>
+<label class="opt"><input type="checkbox" id="optStart" checked> <span>Add the standard "How to use this guide" section at the start (speaking out loud, walk safety)</span></label>
+<label class="opt"><input type="checkbox" id="optStuck" checked> <span>Add the standard "If you get stuck" section at the end (sentence starters and ways to restart)</span></label>
+<div class="row">
+<button class="primary" type="button" id="previewBtn">Preview</button>
+<button type="button" id="downloadBtn">Download guide</button>
+<button type="button" id="exampleBtn">Show an example</button>
+<button type="button" id="clearBtn">Clear</button>
+</div>
+<p id="msg" role="status" aria-live="polite"></p>
+</div>
+
+<div class="card" id="previewCard" hidden>
+<h2>Preview</h2>
+<p class="lead">This is how the guide will look. Links in the contents list may not move the preview, but they work in the downloaded file.</p>
+<iframe id="preview" title="Guide preview" sandbox></iframe>
+</div>
+
+<div class="card">
+<details>
+<summary>The guide text format (for the curious and for AI assistants)</summary>
+<table>
+<tr><th>Write this</th><th>You get</th></tr>
+<tr><td><code>Title: ...</code> (first lines; also <code>Subtitle:</code>, <code>For:</code>, <code>Date:</code>, <code>Level:</code>, <code>Time:</code>)</td><td>The guide's heading</td></tr>
+<tr><td><code># Day 1: Getting started</code></td><td>A section, listed in the contents</td></tr>
+<tr><td><code>## Step 1</code></td><td>A smaller heading</td></tr>
+<tr><td>Plain lines</td><td>A paragraph</td></tr>
+<tr><td><code>- item</code> or <code>1. item</code></td><td>A list</td></tr>
+<tr><td><code>&gt; "On a normal day, I would..."</code></td><td>A sentence-starter box</td></tr>
+<tr><td><code>! Stop somewhere safe before you read.</code></td><td>A highlighted note</td></tr>
+<tr><td><code>::: example</code> ... <code>:::</code></td><td>Example wording, labeled "Example only. Use your own words."</td></tr>
+<tr><td><code>::: closed Facts to check</code> ... <code>:::</code></td><td>A section that opens when tapped (for recall practice)</td></tr>
+<tr><td><code>::: open More ideas</code> ... <code>:::</code></td><td>A tappable section that starts open</td></tr>
+<tr><td><code>**bold**</code>, <code>*italic*</code>, <code>---</code></td><td>Bold, italic, a dividing line</td></tr>
+</table>
+<p>Web links and HTML code are shown as plain text and never become active. The downloaded file contains no code of any kind.</p>
+</details>
+</div>
+</main>
+
+<script src="guide-format.js"></script>
+<script>
+(function(){
+'use strict';
+const G=window.ShapeShftGuide, $=id=>document.getElementById(id);
+const EXAMPLE=`Title: Today's practice: How you find and solve problems
+Subtitle: Operations Manager, Larkspur Outdoor Supply (fictional example)
+For: Morgan Ellery
+Level: Guided
+Time: 15 to 20 minutes
+
+# Today's plan
+The Operations Manager job asks for someone who improves processes. Today, explore the receiving checklist you created at Cedar Ridge.
+! Read a prompt, then start talking out loud. You do not need to sound polished.
+
+# Step 1: Get yourself talking
+Imagine you are describing Cedar Ridge to someone who has never heard of it. Start speaking out loud. If you are stuck, finish one of these sentences:
+> "The company I worked for was responsible for..."
+> "On a normal day, I would..."
+> "Something that used to frustrate me was..."
+Keep talking as thoughts come. You do not need to finish every sentence.
+
+# Step 2: Remember before you look
+Talk for two minutes about the inventory problem before you open the facts below. Then open them and notice what you left out.
+::: closed Facts you told your coach
+- Inventory counts did not match, which delayed store orders.
+- Each shift received freight differently.
+- You wrote a standard receiving checklist and trained six coworkers.
+- Discrepancies dropped by about 40% over six months.
+:::
+
+# Step 3: Explore how you think
+- Why did you look at the receiving process first?
+- What else could you have tried?
+- How did your coworkers react?
+::: example
+I remember there was this problem with inventory that kept coming back. At first I thought it was just people being careless, but what I noticed was...
+:::
+
+# Step 4: Reflect
+- What did you remember for the first time?
+- Where did you get stuck?
+Bring what you noticed back to your coach.`;
+
+function opts(){ return {start:$('optStart').checked, stuck:$('optStuck').checked, generated:new Date().toISOString().slice(0,10)}; }
+function msg(t,kind){ const m=$('msg'); m.textContent=t; m.className=kind||''; }
+function make(){
+  const src=$('src').value;
+  if(!src.trim()){ msg('Paste the guide text first.','bad'); return null; }
+  let html;
+  try{ html=G.build(src,opts()); }catch(e){ msg(e.message,'bad'); return null; }
+  const problems=G.check(html);
+  if(problems.length){ msg('The guide did not pass the safety check, so it was not created: '+problems.join('; ')+'.','bad'); return null; }
+  return html;
+}
+$('previewBtn').addEventListener('click',()=>{
+  const html=make(); if(!html)return;
+  $('preview').srcdoc=html; $('previewCard').hidden=false;
+  msg('Preview ready. It passed the safety check: no code, no links outside the guide, nothing loaded from the internet.','good');
+  $('previewCard').scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('downloadBtn').addEventListener('click',()=>{
+  const html=make(); if(!html)return;
+  const name=G.fileName($('src').value);
+  const url=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+  msg('Saved '+name+'. Look in your Downloads folder. It contains personal information, so keep it private.','good');
+});
+$('exampleBtn').addEventListener('click',()=>{ $('src').value=EXAMPLE; msg('This is a fictional example. Click Preview to see it.',''); });
+$('clearBtn').addEventListener('click',()=>{ $('src').value=''; $('preview').srcdoc=''; $('previewCard').hidden=true; msg('',''); });
+})();
+</script>
+</body>
+</html>

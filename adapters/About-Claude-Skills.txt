@@ -1,0 +1,18 @@
+ShapeShft skills for Claude (optional)
+
+You do NOT need these files. The main setup (a Claude project with ShapeShft-AI-Instructions.md) already contains everything in them.
+
+Some people prefer skills because Claude loads the right instructions automatically, even outside a project. If you want to try them:
+
+1. In Claude, open Settings, then the section for capabilities or skills.
+2. Make sure skills are turned on. Claude may ask you to turn on code execution as well.
+3. Choose to upload a skill, and select one of these ZIP files. Do not unzip them first.
+4. Repeat for each skill you want:
+   - shapeshft-onboarding.zip: setup help and choosing what to do next
+   - shapeshft-career-discovery.zip: building your Career Profile
+   - shapeshft-resume-builder.zip: tailored resumes, cover letters and Workbench JSON
+   - shapeshft-conversation-coach.zip: spoken practice, interview preparation and offline guides
+
+Claude's menus change from time to time. If you cannot find these settings, use the project setup in START-HERE instead. It works the same way.
+
+These skills contain the same instructions as ShapeShft-AI-Instructions.md. They are generated from the same source files.

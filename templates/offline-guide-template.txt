@@ -1,0 +1,29 @@
+Title: (Guide title)
+Subtitle: (Role and company, or the practice context)
+For: (First name)
+Level: (Guided, Supported or Independent)
+Time: (Suggested time)
+
+# Today's plan
+(One or two sentences on the context and why this topic matters.)
+! Read a prompt, then start talking out loud. You do not need to sound polished.
+
+# Step 1: Get yourself talking
+(A warm-up prompt.)
+> "(A sentence starter...)"
+- (A follow-up prompt)
+
+## (A smaller heading)
+(Paragraph text.)
+
+::: closed Facts to check after you speak
+- (A confirmed fact)
+:::
+
+::: example
+(Illustrative wording.)
+:::
+
+# Reflect
+- (A reflection question)
+Bring what you noticed back to your coach.

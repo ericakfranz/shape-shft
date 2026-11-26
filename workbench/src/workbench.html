@@ -1,0 +1,1232 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ShapeShft Resume Workbench</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout concept: a work bench. The resume sits on a white sheet at true size on the left,
+   every line editable. A tabbed side panel holds the ATS checks, the line-by-line chat,
+   the job posting, the requirements map and the load/save tools. */
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface-2:#F5F7F9; --ink:#17202B; --muted:#576273; --line:#D2D8E0;
+  --accent:#2A5A8C; --accent-ink:#FFFFFF; --accent-soft:#E2ECF6;
+  --good:#1B7146; --good-soft:#E0F2E8; --warn:#85570A; --warn-soft:#FAEFD3; --bad:#B0241C; --bad-soft:#FBE3E1;
+  --paper:#FFFFFF; --paper-ink:#1F1F1F; --paper-sub:#444444; --paper-rule:#9A9A9A; --paper-band:#E2E2E4; --paper-hover:#EEF4FB; --paper-sel:#DCEAF8; --paper-shadow:rgba(20,30,45,.16);
+  --font-ui:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1318; --surface:#171E26; --surface-2:#1D2530; --ink:#E4E8ED; --muted:#9AA5B4; --line:#2C3643;
+  --accent:#7DB1E6; --accent-ink:#0E1318; --accent-soft:#1E3248;
+  --good:#5CC28C; --good-soft:#14301F; --warn:#E3B35A; --warn-soft:#352A12; --bad:#F08A82; --bad-soft:#3A1A18;
+  --paper-shadow:rgba(0,0,0,.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1318; --surface:#171E26; --surface-2:#1D2530; --ink:#E4E8ED; --muted:#9AA5B4; --line:#2C3643;
+  --accent:#7DB1E6; --accent-ink:#0E1318; --accent-soft:#1E3248;
+  --good:#5CC28C; --good-soft:#14301F; --warn:#E3B35A; --warn-soft:#352A12; --bad:#F08A82; --bad-soft:#3A1A18;
+  --paper-shadow:rgba(0,0,0,.5); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:14px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 28px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{font-weight:700;font-size:15px;letter-spacing:.01em;margin-right:4px}
+.brand small{display:block;font-weight:500;font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.meta{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 280px;min-width:0}
+.meta label{display:flex;flex-direction:column;gap:2px;font-size:11px;color:var(--muted);flex:1 1 140px;min-width:0}
+.meta input{border:1px solid var(--line);background:var(--surface-2);border-radius:6px;padding:6px 8px;min-width:0;width:100%}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 12px;font-weight:600;cursor:pointer;font-size:13px}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:4px 8px;font-size:12px}
+.chip{font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px;border:1px solid var(--line);background:var(--surface-2);color:var(--muted)}
+.chip.ok{background:var(--good-soft);color:var(--good);border-color:transparent}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:18px;margin-top:16px;align-items:start}
+.stage{min-width:0}
+.stage-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:5px 12px;font-weight:600;font-size:12px;cursor:pointer;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.fit{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px}
+.fit i{display:block;width:90px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.fit i b{display:block;height:100%;background:var(--accent)}
+.paper-box{width:100%;overflow:hidden}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 74px);max-height:calc(100vh - 96px);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:0}
+.tabs{display:flex;flex:none;gap:2px;padding:6px 6px 0;border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{border:0;background:none;padding:8px 10px;font-weight:600;font-size:13px;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .n{font-family:var(--font-mono);font-size:11px;margin-left:4px;padding:1px 6px;border-radius:9px;background:var(--surface-2)}
+.tab .n.bad{background:var(--bad-soft);color:var(--bad)} .tab .n.warn{background:var(--warn-soft);color:var(--warn)}
+.panel{padding:14px;overflow:auto;min-height:0}
+.panel h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.panel section+section{margin-top:18px}
+.panel p{margin:0 0 8px}
+.hint{color:var(--muted);font-size:12.5px}
+.issue{display:flex;gap:8px;align-items:flex-start;width:100%;text-align:left;border:1px solid transparent;border-radius:6px;padding:7px 8px;background:var(--surface-2);margin-bottom:6px;cursor:pointer;font-size:13px}
+.issue:hover{border-color:var(--line)}
+.issue{cursor:default}
+.iwrap{flex:1;min-width:0}
+.issue .ibody{display:block;width:100%;text-align:left;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+.issue .msg{display:block;font-weight:600}
+.issue .pv{display:block;margin-top:3px;font-size:12px;color:var(--muted);font-style:italic}
+.issue .todo{display:block;margin-top:3px;font-size:12.5px}
+.issue .ign{margin-top:6px}
+.chkh{font-size:12.5px;font-weight:600;margin:12px 0 6px}
+.issue .tag{flex:none;font-family:var(--font-mono);font-size:10.5px;font-weight:500;border-radius:4px;padding:2px 5px;margin-top:1px}
+.issue.bad .tag{background:var(--bad-soft);color:var(--bad)} .issue.warn .tag{background:var(--warn-soft);color:var(--warn)}
+.okline{color:var(--good);font-weight:600;font-size:13px}
+.kw{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 10px}
+.kw span{font-size:12px;border-radius:5px;padding:2px 7px;border:1px solid var(--line)}
+.kw .hit{background:var(--good-soft);color:var(--good);border-color:transparent}
+.kw .miss{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.kw .gap{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.kw .theme{background:var(--surface-2);color:var(--muted)}
+textarea{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:6px;padding:8px;resize:vertical;min-height:90px}
+pre.plain{white-space:pre-wrap;font-family:var(--font-mono);font-size:11.5px;background:var(--surface-2);border-radius:6px;padding:10px;margin:8px 0 0;max-height:340px;overflow:auto}
+details summary{cursor:pointer;font-weight:600;font-size:13px}
+.msgs{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.msg{border-radius:8px;padding:8px 10px;font-size:13px;max-width:100%;overflow-wrap:anywhere}
+.msg.user{background:var(--accent-soft);align-self:flex-end}
+.msg.ai{background:var(--surface-2)}
+.opt{margin-top:8px;border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--surface)}
+.opt p{margin:0 0 6px}
+.opt .ibody{display:block;width:100%;text-align:left;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+.opt .ibody:hover b{text-decoration:underline}
+.selbox{border:1px dashed var(--line);border-radius:6px;padding:8px;font-size:12.5px;background:var(--surface-2);overflow-wrap:anywhere}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.map-item{border:1px solid var(--line);border-radius:6px;padding:8px;margin-bottom:6px;font-size:13px}
+.pill{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;margin-right:6px}
+.pill.covered{background:var(--good-soft);color:var(--good)} .pill.partial{background:var(--warn-soft);color:var(--warn)} .pill.gap{background:var(--bad-soft);color:var(--bad)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:40;max-width:calc(100vw - 32px)}
+/* ---- the sheet: sized in points so it matches the PDF ---- */
+.paper{width:612pt;min-height:792pt;background:var(--paper);color:var(--paper-ink);padding:40pt 48pt 40pt;font-family:Helvetica,Arial,"Liberation Sans",sans-serif;font-size:9pt;line-height:11.8pt;transform-origin:top left;box-shadow:0 1px 3px var(--paper-shadow),0 8px 24px var(--paper-shadow)}
+.p-name{font-family:"Times New Roman",Times,Tinos,"Liberation Serif",serif;font-weight:400;font-size:25pt;line-height:27pt;letter-spacing:6pt;text-align:center;text-transform:uppercase;margin:0}
+.p-title{margin:5pt 0 0;text-align:center;text-transform:uppercase;letter-spacing:1.8pt;font-size:8.4pt;color:var(--paper-sub)}
+.p-band{margin:9pt 0 0;border-top:.6pt solid var(--paper-rule);border-bottom:.6pt solid var(--paper-rule);padding:5pt 0 4pt;text-align:center;font-size:8.4pt;letter-spacing:.7pt}
+.p-h{font-family:"Times New Roman",Times,Tinos,"Liberation Serif",serif;font-weight:400;font-size:12.5pt;letter-spacing:1pt;margin:11pt 0 8pt;padding-bottom:3pt;border-bottom:.6pt solid var(--paper-rule);color:var(--paper-ink)}
+.paper.t2 .p-band{margin:7pt -48pt 0;background:var(--paper-band);border:0;padding:2pt 48pt;line-height:11pt}
+.paper.t2 .p-h{font-family:Helvetica,Arial,"Liberation Sans",sans-serif;font-size:9.2pt;letter-spacing:2.6pt;text-transform:uppercase;text-align:center;background:var(--paper-band);border:0;margin:7pt -48pt 11pt;padding:2pt 48pt;line-height:11pt}
+.p-sum,.p-skill{margin:0 0 2pt}
+.p-skill{position:relative}
+.p-skill b{font-weight:700}
+.p-group+.p-group{margin-top:10pt}
+.p-org{font-weight:700;font-size:9.5pt;margin-bottom:1.5pt}
+.p-org .p-date{font-weight:400;font-size:9pt}
+.p-role{margin-top:3pt}
+.p-rtitle{display:flex;justify-content:space-between;gap:12pt;font-weight:700;text-transform:uppercase;letter-spacing:1pt;font-size:9pt;position:relative}
+.p-rtitle .p-date{font-weight:400;text-transform:none;letter-spacing:0}
+.p-rorg{display:flex;justify-content:space-between;gap:12pt}
+.p-date{white-space:nowrap}
+.p-role ul{margin:3pt 0 0;padding:0;list-style:none}
+.p-role li{position:relative;padding-left:13pt;margin-bottom:2.4pt}
+.p-role li::before{content:"";position:absolute;left:3.3pt;top:5.2pt;width:2.8pt;height:2.8pt;border-radius:50%;background:var(--paper-sub)}
+.p-row{display:flex;justify-content:space-between;gap:12pt;position:relative}
+.paper.letter{font-size:10pt;line-height:14.6pt}
+.p-greet{margin:20pt 0 6pt}
+.p-lp{margin:0 0 6pt;position:relative}
+.p-sign{margin:2pt 0 0}
+.p-signname{margin:18pt 0 0}
+.letter-empty{padding:60pt 0;text-align:center;font-family:var(--font-ui);font-size:13px;color:#555}
+.dlwrap{position:relative;display:inline-block}
+.dlmenu{position:absolute;right:0;top:calc(100% + 4px);z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);padding:4px;min-width:250px;display:flex;flex-direction:column}
+.dlmenu[hidden]{display:none}
+.dlmenu button{text-align:left;border:0;background:none;padding:8px 10px;border-radius:6px;font-size:13px;cursor:pointer;color:var(--ink)}
+.dlmenu button:hover{background:var(--surface-2)}
+.ed{border-radius:2px;outline:none;cursor:text}
+.paper:not(.locked) .ed:hover{background:var(--paper-hover)}
+.paper:not(.locked) .ed:focus{background:var(--paper-sel);box-shadow:0 0 0 2px var(--paper-sel)}
+.ed.sel{background:var(--paper-sel)}
+.ctl{position:absolute;left:100%;top:0;padding-left:8pt;display:none;gap:1px;font-family:var(--font-ui);font-size:11px;line-height:1;user-select:none}
+.p-lp:hover .ctl,.p-lp:focus-within .ctl,.p-skill:hover .ctl,.p-role li:hover .ctl,.p-rtitle:hover .ctl,.p-row:hover .ctl,.p-skill:focus-within .ctl,.p-role li:focus-within .ctl,.p-rtitle:focus-within .ctl,.p-row:focus-within .ctl{display:flex}
+.ctl button,.addb{border:1px solid var(--paper-rule);background:var(--paper);color:var(--paper-ink);border-radius:3px;width:17px;height:17px;padding:0;cursor:pointer;font-size:10px}
+.ctl button:hover{background:var(--paper-sel)}
+.addb{display:none;width:auto;padding:1px 6px;height:auto;font-family:var(--font-ui);margin:2pt 0 0;font-size:10px}
+.p-role:hover .addb,.paper-add:hover .addb,.paper:not(.locked) .p-h:hover + .paper-add .addb,.paper:not(.locked) .paper-add .addb{display:inline-block}
+.paper.locked .ctl,.paper.locked .addb{display:none!important}
+.p-sal{margin:9pt 0 2pt}
+.p-ref{margin:0 0 5pt;position:relative}
+.p-ref:hover .ctl,.p-ref:focus-within .ctl{display:flex}
+.copybox textarea{min-height:140px;font-family:var(--font-mono);font-size:12px}
+.p-recnote{margin-top:14pt;border:1px dashed var(--paper-rule);border-radius:4px;padding:6pt 8pt;font-family:var(--font-ui);font-size:11px;line-height:1.4;color:var(--paper-sub)}
+.tab .n:empty{display:none}
+.extra label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.extra .hint{margin:4px 0 0 26px}
+.extra .recbox{margin:8px 0 0 26px}
+.extra .recbox input[type=file]{max-width:100%;font-size:12px}
+@media (max-width:980px){
+  .top{position:static}
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:static;max-height:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top">
+  <div class="brand">ShapeShft Resume Workbench<small id="tplLabel">Template 1 &middot; ATS safe</small></div>
+  <div class="meta">
+    <label for="company">Company<input id="company" autocomplete="off" placeholder="e.g. Larkspur Outdoor Supply"></label>
+    <label for="role">Role title from the posting<input id="role" autocomplete="off" placeholder="e.g. Operations Manager"></label>
+  </div>
+  <div class="actions">
+    <span id="status" class="chip">Draft</span>
+    <button id="approve" class="btn primary" type="button">Approve</button>
+    <span class="dlwrap"><button id="download" class="btn" type="button" disabled>Download PDF</button><div id="dlmenu" class="dlmenu" hidden><button type="button" data-dl="sep">Two files: resume and letter</button><button type="button" data-dl="one">One PDF: letter first, then resume</button><button type="button" data-dl="oneR">One PDF: resume first, then letter</button><button type="button" data-dl="resume">Resume only</button><button type="button" data-dl="letter">Letter only</button></div></span>
+  </div>
+</header>
+
+<main class="app">
+  <div class="stage">
+    <div class="stage-head">
+      <span id="stagehelp">Click any line to edit it.</span>
+      <div class="seg" id="docseg" role="group" aria-label="Document"><button type="button" data-doc="resume" aria-pressed="true">Resume</button><button type="button" data-doc="letter" aria-pressed="false">Cover letter</button></div>
+      <div class="seg" role="group" aria-label="Template"><button type="button" data-tpl="t1" aria-pressed="true">Template 1</button><button type="button" data-tpl="t2" aria-pressed="false">Template 2</button></div>
+      <span class="fit" id="fit" aria-live="polite"></span>
+    </div>
+    <div class="paper-box" id="paperbox"><div class="paper" id="paper" aria-label="Resume sheet"></div></div>
+  </div>
+
+  <aside class="side" aria-label="Tools">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="checks" aria-selected="true">Checks <span class="n" id="nChecks"></span></button>
+      <button class="tab" role="tab" data-tab="discuss" aria-selected="false">Discuss</button>
+      <button class="tab" role="tab" data-tab="posting" aria-selected="false">Posting</button>
+      <button class="tab" role="tab" data-tab="map" aria-selected="false">Map</button>
+      <button class="tab" role="tab" data-tab="extras" aria-selected="false">Extras <span class="n" id="nExtras"></span></button>
+      <button class="tab" role="tab" data-tab="load" aria-selected="false">Load</button>
+    </div>
+    <div class="panel" id="p-checks"></div>
+    <div class="panel" id="p-discuss" hidden></div>
+    <div class="panel" id="p-posting" hidden></div>
+    <div class="panel" id="p-map" hidden></div>
+    <div class="panel" id="p-extras" hidden></div>
+    <div class="panel" id="p-load" hidden></div>
+  </aside>
+</main>
+<div id="toast" role="status" hidden></div>
+
+<script src="../vendor/jspdf.umd.min.js"></script>
+<script src="../vendor/pdf-lib.min.js"></script>
+<script>
+/*LOGIC_START*/
+/* ===== Extras: three options at the end of the resume, all off by default ===== */
+const SAL_DEFAULT='';
+const BLANK_REF={name:'Full name',role:'Job title',company:'Organization',phone:'',email:'',rel:'How you know this person.'};
+function normExtras(x){
+  x=x||{};
+  const refs=(Array.isArray(x.refs)?x.refs:[]).map(f=>({name:norm(f.name),role:norm(f.role),company:norm(f.company),phone:norm(f.phone),email:norm(f.email),rel:norm(f.rel)}));
+  return {references:!!x.references,recommendation:!!x.recommendation,salary:!!x.salary,salaryText:norm(x.salaryText)||SAL_DEFAULT,refs};
+}
+/* Optional honesty-check lists. The AI assistant copies them from the Master Career Profile. */
+function normChecks(c){
+  c=c||{}; const list=a=>(Array.isArray(a)?a:[]).map(norm).filter(Boolean);
+  return {confirmedTerms:list(c.confirmedTerms),doNotClaim:list(c.doNotClaim),confirmedNumbers:list(c.confirmedNumbers)};
+}
+/* ===== Starter resume: a fictional example. It does not describe a real person or employer. ===== */
+const STARTER = {
+  meta:{company:"",role:"Operations Manager"},
+  name:"Morgan Ellery",
+  title:"Operations Manager | Inventory Control | Team Training",
+  contact:"Riverside Falls, OH | 555-555-0142 | morgan.ellery@example.com",
+  summary:"Warehouse and distribution supervisor with 14 years at one regional distribution center, from associate to shift supervisor. Reduced inventory discrepancies by about 40% by standardizing the receiving process and training the team to use it. Scheduled and supervised crews of up to 18 people, and worked with drivers, buyers and store managers to keep orders moving. Looking for an operations role where process improvement and team development matter.",
+  skills:[
+    {label:"Operations",value:"inventory control, receiving, cycle counts, order fulfillment, shift scheduling, process improvement, standard operating procedures"},
+    {label:"Safety",value:"OSHA 10-Hour General Industry, forklift trainer, incident reporting, safety walk-throughs"},
+    {label:"Systems",value:"warehouse management system (WMS), handheld scanners, Microsoft Excel, Google Sheets"},
+    {label:"Leadership",value:"training new hires, coaching, crew scheduling, cross-shift handoffs, vendor and driver coordination"}
+  ],
+  exp:[
+    {title:"Shift Supervisor",org:"Cedar Ridge Distribution | Riverside Falls, OH",start:"03/2019",end:"08/2026",bullets:[
+      "Supervised a second-shift crew of 12 to 18 associates in receiving, picking and loading for a distribution center that served 40 retail stores.",
+      "Reduced inventory discrepancies by about 40% over six months by mapping the receiving process, writing a standard checklist and training six coworkers to use it.",
+      "Built the weekly shift schedule and covered absences so outbound trucks left on time during peak season.",
+      "Trained new hires on scanners, safe lifting and forklift basics, and became the site's main trainer for the receiving dock.",
+      "Started written handoff notes between shifts so damaged freight, late deliveries and open issues were not lost at shift change."
+    ]},
+    {title:"Inventory Lead",org:"Cedar Ridge Distribution | Riverside Falls, OH",start:"06/2015",end:"03/2019",bullets:[
+      "Led cycle counts across more than 6,000 storage locations and investigated count differences with the inventory control manager.",
+      "Worked with buyers and vendors to resolve short shipments and mislabeled freight."
+    ]},
+    {title:"Warehouse Associate",org:"Cedar Ridge Distribution | Riverside Falls, OH",start:"07/2012",end:"06/2015",bullets:[
+      "Picked, packed and loaded store orders; earned forklift certification in the first year."
+    ]}
+  ],
+  edu:[
+    {name:"High school diploma",org:"Riverside Falls High School",date:"2012"}
+  ],
+  certs:[
+    {name:"OSHA 10-Hour General Industry",date:"04/2018"},
+    {name:"Forklift Operator Trainer",date:"09/2017"}
+  ],
+  checks:{confirmedTerms:["inventory","warehouse","supervisor","scheduling","training"],doNotClaim:["SAP","Six Sigma","Lean certification"],confirmedNumbers:["14","40","18","12","6,000","10"]},
+  extras:{references:false,recommendation:false,salary:false,salaryText:SAL_DEFAULT,refs:[]},
+  map:[]
+};
+
+/* ===== Common helpers ===== */
+function norm(s){
+  s=String(s==null?'':s);
+  s=s.replace(/[‘’‚′]/g,"'").replace(/[“”„″]/g,'"')
+     .replace(/[–—−]/g,'-').replace(/…/g,'...').replace(/[   ​]/g,' ')
+     .replace(/[•●·]/g,'-');
+  try{s=s.normalize('NFKD').replace(/[̀-ͯ]/g,'');}catch(e){}
+  return s.replace(/[^\x20-\x7E]/g,'').replace(/\s+/g,' ').trim();
+}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function normalizeResume(r){
+  const o=clone(r);
+  ['name','title','contact','summary'].forEach(k=>o[k]=norm(o[k]));
+  o.skills=(o.skills||[]).map(s=>({label:norm(s.label),value:norm(s.value)}));
+  o.exp=(o.exp||[]).map(e=>({title:norm(e.title),org:norm(e.org),start:norm(e.start),end:norm(e.end),bullets:(e.bullets||[]).map(norm)}));
+  o.certs=(o.certs||[]).map(c=>({name:norm(c.name),date:norm(c.date)}));
+  o.meta={company:norm((o.meta||{}).company),role:norm((o.meta||{}).role)};
+  o.edu=(o.edu||[]).map(d=>({name:norm(d.name),org:norm(d.org),date:norm(d.date)}));
+  o.checks=normChecks(o.checks);
+  o.extras=normExtras(o.extras);
+  o.map=(o.map||[]).map(m=>({req:String(m.req||''),status:String(m.status||'gap'),where:String(m.where||''),note:String(m.note||'')}));
+  return o;
+}
+function normalizeLetter(l){
+  if(!l)return null;
+  const body=Array.isArray(l.body)?l.body:String(l.body||'').split(/\n\s*\n/);
+  return {greeting:norm(l.greeting||'Dear Hiring Team,'),body:body.map(norm),closing:norm(l.closing||'Sincerely,')};
+}
+function fields(r){
+  const f=[];
+  const add=(path,text,kind,where)=>f.push({path,text:String(text==null?'':text),kind,where});
+  add('name',r.name,'name','Name');add('title',r.title,'title','Headline');add('contact',r.contact,'contact','Contact line');
+  add('summary',r.summary,'summary','Professional Summary');
+  (r.skills||[]).forEach((s,i)=>{add(`skills.${i}.label`,s.label,'skilllabel','Core Skills row '+(i+1));add(`skills.${i}.value`,s.value,'skill','Core Skills: '+s.label);});
+  (r.exp||[]).forEach((e,i)=>{
+    const w=`${e.title}, ${String(e.org).split('|')[0].trim()}`;
+    add(`exp.${i}.title`,e.title,'role',w);add(`exp.${i}.org`,e.org,'org',w);add(`exp.${i}.start`,e.start,'date',w);add(`exp.${i}.end`,e.end,'date',w);
+    (e.bullets||[]).forEach((b,j)=>add(`exp.${i}.bullets.${j}`,b,'bullet',`Bullet ${j+1}, ${w}`));
+  });
+  (r.edu||[]).forEach((d,i)=>{add(`edu.${i}.name`,d.name,'edu','Education');add(`edu.${i}.org`,d.org,'edu','Education');add(`edu.${i}.date`,d.date,'edudate','Education date');});
+  (r.certs||[]).forEach((c,i)=>{add(`certs.${i}.name`,c.name,'cert','Certification');add(`certs.${i}.date`,c.date,'date','Certification date');});
+  return f;
+}
+/* Back-to-back roles at the same employer form one group: the employer prints once, then each role with its own dates. */
+function groupsOf(exp){
+  const g=[]; const key=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
+  (exp||[]).forEach((e,i)=>{ const last=g[g.length-1]; if(last&&key(e.org)&&key(e.org)===key(exp[last.idx[0]].org)) last.idx.push(i); else g.push({idx:[i]}); });
+  return g;
+}
+function getP(o,p){return p.split('.').reduce((a,k)=>a==null?a:a[k],o);}
+function setP(o,p,v){const ks=p.split('.');const last=ks.pop();const t=ks.reduce((a,k)=>a[k],o);t[last]=v;}
+function toPlain(r){
+  const L=[];
+  L.push(r.name,r.title,r.contact,'','Professional Summary',r.summary,'','Core Skills');
+  (r.skills||[]).forEach(s=>L.push(`${s.label}: ${s.value}`));
+  L.push('','Work Experience');
+  groupsOf(r.exp).forEach(g=>{
+    const es=g.idx.map(i=>r.exp[i]);
+    L.push('',es[0].org+(es.length>1?` | ${es[es.length-1].start} - ${es[0].end}`:''));
+    es.forEach(e=>{L.push(`${e.title} | ${e.start} - ${e.end}`);(e.bullets||[]).forEach(b=>L.push('- '+b));});
+  });
+  if((r.edu||[]).length){L.push('','Education');(r.edu||[]).forEach(d=>L.push([d.name,d.org].filter(Boolean).join(', ')+(d.date?' | '+d.date:'')));}
+  if((r.certs||[]).length){L.push('','Certifications');(r.certs||[]).forEach(c=>L.push(`${c.name} | ${c.date}`));}
+  const X=r.extras||{};
+  if(X.salary&&X.salaryText) L.push('','Salary requirement: '+X.salaryText);
+  if(X.references&&(X.refs||[]).length){
+    L.push('','References');
+    X.refs.forEach(f=>{ L.push([f.name,f.role,f.company].filter(Boolean).join(', ')); L.push('Phone: '+f.phone+' | Email: '+f.email); L.push('Relationship: '+f.rel); });
+  }
+  return L.join('\n');
+}
+
+/* ===== Honesty-check lists. They come from the optional "checks" key in the JSON and from the skills rows on the resume. ===== */
+let CONFIRMED=[], GAPS=[], BANNED=[], ALLOW=null;
+const reEsc=t=>String(t).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const termRe=t=>new RegExp('(^|[^a-z0-9])('+reEsc(String(t).toLowerCase())+')(?=$|[^a-z0-9])','i');
+function setCheckConfig(r){
+  const c=normChecks(r&&r.checks), seen=new Set(), conf=[];
+  const add=t=>{ t=String(t||'').toLowerCase().replace(/[.;:]+$/,'').trim(); if(t.length>1&&t.length<=40&&!seen.has(t)){ seen.add(t); conf.push(t); } };
+  c.confirmedTerms.forEach(add);
+  ((r&&r.skills)||[]).forEach(s=>String(s.value||'').split(/[,;]/).forEach(add));
+  CONFIRMED=conf;
+  GAPS=c.doNotClaim.map(t=>t.toLowerCase());
+  BANNED=GAPS.map(t=>({re:termRe(t),label:t,why:'your career profile says this is not part of your experience.'}));
+  const nums=c.confirmedNumbers.map(x=>{ const m=String(x).replace(/,/g,'').match(/\d+(?:\.\d+)?/); return m?parseFloat(m[0]):null; }).filter(v=>v!=null);
+  ALLOW=nums.length?new Set(nums):null;
+}
+const PLACEHOLDER=/\[[^\]]*\]|\blorem ipsum\b|\bTODO\b|\bX{3,}\b/i;
+const WATCH=[
+  {re:/\bresults[- ]driven\b|\bdetail[- ]oriented\b|\bproven track record\b|\bgo-getter\b|\bteam player\b|\bhard[- ]working\b|\bsynerg/i,msg:'Generic phrase. Recruiters skip these. Show the quality with a specific example instead.'},
+  {re:/^responsible for\b/i,msg:'"Responsible for" describes a duty, not what you did. Start with an action verb and, where you can, the result.'}
+];
+const STOP=new Set('about above after again also another because before being below between both build could does doing during each every from have having here into just like make many more most much must only other over same should some such than that their them then there these they this those through under until very want what when where which while will with within without would your you our are and the for not but can has its was were who how any all new may per use used using work working team teams role roles help able ability across experience strong skills including required preferred plus years year join looking ideal candidate company position responsibilities requirements qualifications'.split(' '));
+
+function hasTerm(text,term){
+  const e=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return new RegExp('(^|[^a-z0-9])'+e+'($|[^a-z0-9])','i').test(text);
+}
+/* The posting's most-used phrases: confirmed terms it uses, plus two-word phrases it repeats (for example "booking systems"). */
+function postingPhrases(posting,role){
+  const p=posting.toLowerCase(), cnt={};
+  const count=t=>{const e=t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return (p.match(new RegExp('(^|[^a-z0-9])'+e+'(?=$|[^a-z0-9])','g'))||[]).length;};
+  CONFIRMED.forEach(t=>{ if(!(t in cnt)){ const n=count(t); if(n) cnt[t]=n; } });
+  const rl=String(role||'').toLowerCase();
+  const w=p.match(/[a-z][a-z-]+/g)||[];
+  for(let i=0;i<w.length-1;i++){ const a=w[i],b=w[i+1]; if(a.length<3||b.length<3||STOP.has(a)||STOP.has(b))continue; const bg=a+' '+b; if(rl.includes(bg))continue; cnt[bg]=(cnt[bg]||0)+1; }
+  let list=Object.keys(cnt).filter(t=>cnt[t]>=2||CONFIRMED.includes(t)).sort((a,b)=>cnt[b]-cnt[a]||b.length-a.length);
+  list=list.filter((t,i)=>!list.some((o,j)=>j<i&&o!==t&&(o.includes(t)||t.includes(o))));
+  return list.slice(0,8).map(t=>({term:t,n:cnt[t],confirmed:CONFIRMED.includes(t)}));
+}
+function analyze(posting,text){
+  const p=posting.toLowerCase(), t=text.toLowerCase();
+  const hit=[],miss=[],gaps=[],themes=[];
+  const seen=new Set();
+  CONFIRMED.forEach(term=>{ if(seen.has(term))return; seen.add(term); if(hasTerm(p,term)) (hasTerm(t,term)?hit:miss).push(term); });
+  GAPS.forEach(g=>{ if(hasTerm(g==='front'?p.replace(/front[- ]?end/g,''):p,g)) gaps.push(g); });
+  const freq={};
+  (p.match(/[a-z][a-z-]{4,}/g)||[]).forEach(w=>{ if(!STOP.has(w)) freq[w]=(freq[w]||0)+1; });
+  Object.keys(freq).filter(w=>freq[w]>=3 && !t.includes(w) && !CONFIRMED.some(c=>c.includes(w)) && !GAPS.includes(w)).sort((a,b)=>freq[b]-freq[a]).slice(0,10).forEach(w=>themes.push(`${w} (${freq[w]})`));
+  return {hit,miss,gaps,themes};
+}
+
+/* ===== ATS and honesty checks: plain code, no model, no tokens ===== */
+function runChecks(r,posting,info){
+  const errors=[],warnings=[];
+  const add=(arr,id,msg,path,fix)=>arr.push({id,msg,path,fix});
+  const F=fields(r);
+  if(String(r.title).length>78) add(warnings,'title','The headline is long and may wrap. Keep it under about 75 characters.','title');
+  if(!/@/.test(r.contact)&&!/\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/.test(r.contact)) add(errors,'contact','The contact line needs an email address or a phone number so employers can reach you.','contact');
+  const nonAscii=F.filter(f=>/[^\x20-\x7E]/.test(f.text));
+  if(nonAscii.length) add(warnings,'ascii',`${nonAscii.length} line(s) use dashes, curly quotes or other non-ASCII characters. Some ATS tools misread them.`,nonAscii[0].path,'ascii');
+  F.forEach(f=>{
+    BANNED.forEach(b=>{ const m=f.text.match(b.re); if(m) add(errors,'banned',`Found "${(m[2]||m[0]).trim()}" in this line. ${b.why.charAt(0).toUpperCase()+b.why.slice(1)}`,f.path); });
+    if(PLACEHOLDER.test(f.text)) add(errors,'lplace','This line still has a placeholder such as [Company].',f.path);
+    if(f.kind==='summary'||f.kind==='bullet'||f.kind==='skill') WATCH.forEach(w=>{ if(w.re.test(f.text)) add(warnings,'watch',w.msg,f.path); });
+  });
+  (r.exp||[]).forEach((e,i)=>{
+    if(!/^\d{2}\/\d{4}$/.test(e.start)) add(warnings,'date','Use MM/YYYY for the start date.',`exp.${i}.start`);
+    if(!/^\d{2}\/\d{4}$/.test(e.end)&&!/^present$/i.test(e.end)) add(warnings,'date','Use MM/YYYY (or "Present") for the end date.',`exp.${i}.end`);
+    if(!(e.bullets||[]).length) add(warnings,'empty',`"${e.title}" has no bullets.`,`exp.${i}.title`);
+  });
+  const body=F.filter(f=>['summary','skill','bullet','cert'].includes(f.kind));
+  const all=body.map(f=>f.text).join(' ');
+  const odd=new Set(); let oddPath='';
+  body.forEach(f=>{ const re=/\d[\d,]*(?:\.\d+)?/g; let m; while((m=re.exec(f.text))){ const raw=m[0].replace(/,/g,''); const v=parseFloat(raw); const next=f.text[m.index+m[0].length]; if(v>=1990&&v<=2035&&raw.length===4) continue; if(v<10&&next!=='%') continue; if(ALLOW&&!ALLOW.has(v)){ odd.add(m[0]); if(!oddPath) oddPath=f.path; } } });
+  if(odd.size) add(warnings,'nums',`These numbers are not in your confirmed list: ${[...odd].join(', ')}. Keep them only if they are true and approved.`,oddPath);
+  const X=r.extras||{};
+  if(X.salary){
+    const sn=(String(X.salaryText||'').match(/\d[\d,]*(?:\.\d+)?/g)||[]).map(s=>parseFloat(s.replace(/,/g,''))).filter(v=>v>=1000);
+    if(sn.length<2) add(warnings,'salone','The salary requirement shows one number or none. Use a range.','extras.salaryText');
+  }
+  if(X.references&&(X.refs||[]).some(f=>!f.phone||!f.email)) add(warnings,'refblank','A reference has no phone number or email.','extras.refs.0.name');
+  if(X.recommendation&&info&&!info.rec) add(errors,'recmiss','The letter of recommendation is on, but no PDF is chosen. The download will not include it.');
+  F.forEach(f=>{
+    if(f.kind==='bullet'&&f.text.length>300) add(warnings,'long','This bullet is long (over 300 characters). Split or trim it.',f.path);
+    if(f.kind==='summary'&&f.text.length>650) add(warnings,'sumlen','The summary is over 650 characters. About four lines works best.',f.path);
+    if(f.kind==='bullet'&&f.text&&!/^[A-Z]/.test(f.text)) add(warnings,'verb','Start the bullet with a capital action verb.',f.path);
+  });
+  /* Version 9: tense, repeated first verbs and readability (plain code, no tokens) */
+  const PRES=/^(?!during\b)(?:(?:lead|own|manage|build|run|train|write|support|handle|work|create|drive|help|partner|debug|troubleshoot|coach|design|resolve|maintain|serve|develop|deliver|monitor|identify|collaborate|ensure|oversee|guide|answer|migrate|onboard|negotiate|recruit|hire|test|document|automate|report|track|improve|reduce|increase|grow)(?:s|es)?\b|[a-z]+ing\b)/i;
+  const starts={};
+  (r.exp||[]).forEach((e,i)=>{
+    const bl=e.bullets||[];
+    bl.forEach((b,j)=>{
+      const t=String(b).trim(), p=`exp.${i}.bullets.${j}`;
+      if(!/^present$/i.test(String(e.end).trim())&&PRES.test(t)) add(warnings,'ptense','This bullet is for a past role but starts in the present tense. Use the past tense.',p);
+      const w=(t.match(/^[A-Za-z-]+/)||[''])[0].toLowerCase(); if(w)(starts[w]=starts[w]||[]).push(p);
+    });
+    if(bl.length>6) add(warnings,'manyb',`"${e.title}" has ${bl.length} bullets. More than 6 is hard to scan.`,`exp.${i}.title`);
+    if(i>0&&r.exp[0]&&bl.length>(r.exp[0].bullets||[]).length) add(warnings,'oldheavy',`"${e.title}" has more bullets than your most recent role. Recruiters read the latest role first.`,`exp.${i}.title`);
+  });
+  Object.keys(starts).forEach(w=>{ if(starts[w].length>=3) add(warnings,'repverb',`${starts[w].length} bullets start with "${w.charAt(0).toUpperCase()+w.slice(1)}". Vary the first verb so each bullet stands out.`,starts[w][2]); });
+  if(info&&info.wraps) info.wraps.forEach(x=>{ const t=String(getP(r,x.path)||''); if(x.lines>=3&&t.length<=300) add(warnings,'wrap3',`This bullet wraps to ${x.lines} lines. Two lines are easier to scan.`,x.path); });
+  if(info&&info.pages===1){
+    if(info.fill>0.985) add(warnings,'dense','The page is full to the bottom edge. A little white space makes it easier to scan.');
+    else if(info.fill<0.7) add(warnings,'sparse',`The page is only ${Math.round(info.fill*100)}% full. There is room for one more proof point.`);
+  }
+  if(info){
+    if(info.pages>2) add(warnings,'pages',`The PDF is ${info.pages} pages. Aim for 1 or 2.`);
+    else if(info.pages===2&&info.fill<0.2&&!X.references) add(warnings,'pages','Page 2 has only a few lines. Trim to one page if you can.');
+  }
+  const sm=F.find(f=>f.kind==='summary');
+  if(sm&&sm.text){
+    const st=sm.text.toLowerCase(), sents=sm.text.split(/(?<=[.!?])\s+/), last=(sents[sents.length-1]||'').toLowerCase();
+    const hasPost=!!(posting&&posting.trim().length>40), pl=hasPost?posting.toLowerCase():'';
+    const exc=/\bexcit|\bthrilled|\bpassion/.test(last)&&!CONFIRMED.some(c=>hasTerm(last,c));
+    const n=hasPost?CONFIRMED.filter(c=>hasTerm(pl,c)&&hasTerm(st,c)).length:null;
+    if(hasPost?n<3:exc) add(warnings,'align',(hasPost?`Only ${n} of the posting's keywords appear in the summary. Aim for 3 or more. `:'')+(exc?'The summary ends on excitement only. ':'')+'Show how you match this role, in the posting\'s words. Use "Show alignment" in Discuss.',sm.path);
+  }
+  const kw=(posting&&posting.trim().length>40)?analyze(posting,all):null;
+  let top=null;
+  if(kw){
+    const topText=((info&&info.top)?info.top:[r.title,String(r.summary).slice(0,260)]).join(' ');
+    const ph=postingPhrases(posting,r.meta&&r.meta.role);
+    top={lines:(info&&info.top)||null,hit:ph.filter(x=>hasTerm(topText,x.term)),miss:ph.filter(x=>!hasTerm(topText,x.term))};
+    const role=String((r.meta&&r.meta.role)||'').trim();
+    if(role&&!hasTerm(String(r.title),role)) add(warnings,'toptitle',`The headline does not use the posting's exact title, "${role}". Recruiters look for it first.`,'title');
+    if(ph.length&&top.hit.length<2) add(warnings,'top3',`The first 3 lines (headline and first 2 summary lines) use ${top.hit.length} of the posting's top phrases. Recruiters scan these lines first. Missing: ${top.miss.slice(0,5).map(x=>'"'+x.term+'"').join(', ')}.`,'summary');
+  }
+  return {errors,warnings,kw,info,top};
+}
+
+/* ===== PDF engine: standard Times and Helvetica fonts, real selectable text, ASCII only ===== */
+function buildPdf(JsPDF,r0,meta,tpl,docIn,letter){
+  const r=normalizeResume(r0);
+  const doc=docIn||new JsPDF({unit:'pt',format:'letter',compress:true});
+  if(docIn)doc.addPage();
+  const W=612,H=792,ML=48,MR=48,MT=38,MB=38,CW=W-ML-MR,BOT=H-MB;
+  const INK=[31,31,31],SUB=[68,68,68],RULE=[154,154,154];
+  let y=MT,pages=1;
+  const font=(f,st,sz)=>{doc.setFont(f,st);doc.setFontSize(sz);};
+  const color=c=>doc.setTextColor(c[0],c[1],c[2]);
+  const wd=(s,cs)=>doc.getTextWidth(s)+(cs||0)*s.length;
+  const fit=(s,max,cs)=>{while(cs>0.2&&wd(s,cs)>max)cs-=0.2;return cs;};
+  const centered=(s,cs,yy)=>{const w=wd(s,cs);doc.text(s,(W-w)/2+cs/2,yy,{charSpace:cs});};
+  const rule=(yy,lw)=>{doc.setDrawColor(RULE[0],RULE[1],RULE[2]);doc.setLineWidth(lw||0.6);doc.line(ML,yy,W-MR,yy);};
+  const newPage=()=>{doc.addPage();pages++;y=MT;};
+  const need=h=>{if(y+h>BOT)newPage();};
+  const wrap=(text,first,rest)=>{
+    const words=String(text).split(/\s+/).filter(Boolean);const lines=[];let cur='',limit=first;
+    words.forEach(w=>{const t=cur?cur+' '+w:w;if(cur&&doc.getTextWidth(t)>limit){lines.push(cur);cur=w;limit=rest;}else cur=t;});
+    if(cur)lines.push(cur);return lines;};
+  const LH=11.8;
+
+  // header
+  font('times','normal',25);color(INK);
+  const nm=r.name.toUpperCase();centered(nm,fit(nm,CW,6),y+20);y+=20;
+  font('helvetica','normal',8.4);color(SUB);
+  const ti=r.title.toUpperCase();y+=17;centered(ti,fit(ti,CW,2.2),y);
+  const T2=tpl==='t2';
+  const band=(yy,hh)=>{doc.setFillColor(226,226,228);doc.rect(0,yy,W,hh,'F');};
+  if(!T2){
+    y+=12;rule(y);y+=14;
+    color(INK);font('helvetica','normal',8.4);centered(r.contact,fit(r.contact,CW,0.7),y);
+    y+=8.5;rule(y);y+=6;
+  }else{
+    y+=7;band(y,15);y+=10.6;
+    color(INK);font('helvetica','normal',8.4);centered(r.contact,fit(r.contact,CW,0.7),y);
+    y+=4.4;
+  }
+
+  const section=t=>{
+    need(56);y+=T2?7:10;
+    if(!T2){font('times','normal',12.5);color(INK);doc.text(t,ML,y,{charSpace:1});y+=5;rule(y);y+=13;}
+    else{band(y,15);font('helvetica','normal',9.2);color(INK);const s=t.toUpperCase();centered(s,2.6,y+10.6);y+=15+11;}
+  };
+
+  if(letter){
+    const l=normalizeLetter(letter), LL=14.6;
+    const para=(t,gap)=>{font('helvetica','normal',10);color(INK);wrap(t,CW,CW).forEach(x=>{need(LL);doc.text(x,ML,y);y+=LL;});y+=gap;};
+    y+=T2?20:14;
+    para(l.greeting,6);
+    l.body.filter(t=>t.trim()).forEach(t=>para(t,6));
+    y+=2;para(l.closing,0);
+    y+=18;need(LL);font('helvetica','normal',10);doc.text(r.name,ML,y);y+=LL;
+    const lf=Math.max(0,Math.min(1,(y-MT)/(BOT-MT)));
+    doc.setProperties({title:[r.name,'Cover Letter',(meta&&meta.company)||'',(meta&&meta.role)||''].filter(Boolean).join(' - '),author:r.name,subject:'Cover letter',creator:'Resume Workbench'});
+    return {doc,pages,fill:lf};
+  }
+
+  section('Professional Summary');
+  font('helvetica','normal',9);color(INK);
+  const sumLines=wrap(r.summary,CW,CW); const top=[r.title].concat(sumLines.slice(0,2));
+  sumLines.forEach(l=>{need(LH);doc.text(l,ML,y);y+=LH;});
+
+  if(r.skills.length) section('Core Skills');
+  r.skills.forEach(s=>{
+    font('helvetica','bold',9);const lab=s.label+':';const lw=doc.getTextWidth(lab)+3;
+    font('helvetica','normal',9);const lines=wrap(s.value,CW-lw,CW);
+    need(LH*Math.min(lines.length,2));
+    font('helvetica','bold',9);doc.text(lab,ML,y);
+    font('helvetica','normal',9);
+    lines.forEach((l,i)=>{if(i>0)need(LH);doc.text(l,i===0?ML+lw:ML,y);y+=LH;});
+    y+=1.5;
+  });
+
+  section('Work Experience');
+  const wraps=[];
+  const firstH=e=>{font('helvetica','normal',9);const n=e.bullets.length?wrap(e.bullets[0],CW-13,CW-13).length:0;return LH*Math.min(n,2);};
+  const orgLine=(txt,range)=>{font('helvetica','bold',9.5);color(INK);doc.text(txt,ML,y);if(range){font('helvetica','normal',9);doc.text(range,W-MR,y,{align:'right'});}y+=LH+1.5;};
+  groupsOf(r.exp).forEach((g,gi)=>{
+    const es=g.idx.map(i=>r.exp[i]), multi=es.length>1;
+    if(gi>0)y+=3;
+    need(LH+1.5+LH+1+firstH(es[0])+6);
+    let gpage=pages;
+    orgLine(es[0].org,multi?`${es[es.length-1].start} - ${es[0].end}`:'');
+    g.idx.forEach((ei,k)=>{
+    const e=r.exp[ei];
+    need(LH+1+firstH(e)+4);
+    if(pages!==gpage){ orgLine(es[0].org+' (continued)',''); gpage=pages; }
+    font('helvetica','bold',9);color(INK);doc.text(e.title.toUpperCase(),ML,y,{charSpace:1});
+    font('helvetica','normal',9);doc.text(`${e.start} - ${e.end}`,W-MR,y,{align:'right'});
+    y+=LH+1;
+    e.bullets.forEach((b,bj)=>{
+      font('helvetica','normal',9);const lines=wrap(b,CW-13,CW-13);
+      wraps.push({path:`exp.${ei}.bullets.${bj}`,lines:lines.length});
+      need(LH*Math.min(lines.length,2)+2);
+      doc.setFillColor(SUB[0],SUB[1],SUB[2]);doc.circle(ML+4.6,y-3,1.35,'F');
+      lines.forEach((l,i)=>{if(i>0)need(LH);doc.text(l,ML+13,y);y+=LH;});
+      y+=1.8;
+    });
+    y+=4;
+    });
+  });
+
+  if(r.edu.length){
+    section('Education');
+    r.edu.forEach(d=>{font('helvetica','normal',9);color(INK);const ls=wrap([d.name,d.org].filter(Boolean).join(', '),CW-70,CW-70);need(LH*ls.length);ls.forEach((l,i)=>{doc.text(l,ML,y);if(i===0&&d.date)doc.text(d.date,W-MR,y,{align:'right'});y+=LH;});});
+  }
+  if(r.certs.length){
+    section('Certifications');
+    r.certs.forEach(c=>{need(LH);font('helvetica','normal',9);color(INK);doc.text(c.name,ML,y);doc.text(c.date,W-MR,y,{align:'right'});y+=LH;});
+  }
+  const X=r.extras||{};
+  if(X.salary&&X.salaryText){
+    y+=T2?6:8; need(LH*2);
+    font('helvetica','bold',9);color(INK);const slab='Salary requirement:';const slw=doc.getTextWidth(slab)+3;
+    font('helvetica','normal',9);const sl=wrap(X.salaryText,CW-slw,CW);
+    font('helvetica','bold',9);doc.text(slab,ML,y);
+    font('helvetica','normal',9);
+    sl.forEach((l,i)=>{if(i>0)need(LH);doc.text(l,i===0?ML+slw:ML,y);y+=LH;});
+  }
+  if(X.references&&(X.refs||[]).length){
+    section('References');
+    X.refs.forEach(f=>{
+      font('helvetica','normal',9);color(INK);
+      const contact=[f.phone&&('Phone: '+f.phone),f.email&&('Email: '+f.email)].filter(Boolean).join(' | ');
+      const rl=f.rel?wrap('Relationship: '+f.rel,CW,CW):[];
+      need(LH*(1+(contact?1:0)+rl.length)+6);
+      font('helvetica','bold',9);doc.text(f.name,ML,y);const nw=doc.getTextWidth(f.name);
+      font('helvetica','normal',9);const tail=[f.role,f.company].filter(Boolean).join(', ');
+      if(tail)doc.text(', '+tail,ML+nw,y);
+      y+=LH;
+      if(contact){doc.text(contact,ML,y);y+=LH;}
+      rl.forEach(l=>{doc.text(l,ML,y);y+=LH;});
+      y+=5;
+    });
+  }
+  const lastFill=Math.max(0,Math.min(1,(y-MT)/(BOT-MT)));
+  const label=[r.name,'Resume',(meta&&meta.company)||'',(meta&&meta.role)||''].filter(Boolean).join(' - ');
+  doc.setProperties({title:label,author:r.name,subject:'Resume',creator:'Resume Workbench'});
+  return {doc,pages,fill:lastFill,wraps,top};
+}
+function pdfFileName(meta,kind,name){
+  const camel=s=>String(s||'').replace(/[^A-Za-z0-9 ]/g,' ').split(/\s+/).filter(Boolean).map(w=>w[0].toUpperCase()+w.slice(1)).join('');
+  const nm=String(name||'').replace(/[^A-Za-z0-9 ]/g,' ').trim().split(/\s+/).filter(Boolean).join('-');
+  const parts=[(nm?nm+'-':'')+(kind||'Resume')];
+  const c=camel(meta.company),ro=camel(meta.role);
+  if(c)parts.push(c); if(ro)parts.push(ro);
+  return parts.join('-')+'.pdf';
+}
+function letterPlain(r,l){
+  const x=normalizeLetter(l); if(!x)return '';
+  return [r.name,r.contact,'',x.greeting,''].concat(x.body.filter(t=>t.trim()).map(t=>t+'\n'),[x.closing,r.name]).join('\n');
+}
+function runLetterChecks(l,r,posting,meta,info){
+  const errors=[],warnings=[];
+  if(!l)return {errors,warnings,kw:null,info};
+  const add=(arr,id,msg,path)=>arr.push({id,msg,path});
+  const F=[{path:'greeting',text:l.greeting},{path:'closing',text:l.closing}].concat(l.body.map((t,i)=>({path:'body.'+i,text:t})));
+  const filled=l.body.filter(t=>t.trim());
+  if(!filled.length) add(errors,'lnone','The letter has no text yet.','body.0');
+  l.body.forEach((t,i)=>{
+    if(!t.trim()) add(warnings,'lempty','This paragraph is empty.','body.'+i);
+    if(t.length>900) add(warnings,'lpara','This paragraph is long (over 900 characters).','body.'+i);
+  });
+  const nonAscii=F.filter(f=>/[^\x20-\x7E]/.test(f.text));
+  if(nonAscii.length) add(warnings,'ascii',`${nonAscii.length} line(s) use dashes, curly quotes or other non-ASCII characters.`,nonAscii[0].path);
+  F.forEach(f=>{
+    BANNED.forEach(b=>{ const m=f.text.match(b.re); if(m) add(errors,'banned',`Found "${(m[2]||m[0]).trim()}" in this line. ${b.why.charAt(0).toUpperCase()+b.why.slice(1)}`,f.path); });
+    WATCH.forEach(w=>{ if(w.re.test(f.text)) add(warnings,'watch',w.msg,f.path); });
+    if(/\[[^\]]*\]|\bTODO\b|\blorem\b|\bX{3,}\b/i.test(f.text)) add(errors,'lplace','This line still has a placeholder such as [Company].',f.path);
+  });
+  const odd=new Set(); let oddPath='';
+  F.forEach(f=>{ const re=/\d[\d,]*(?:\.\d+)?/g; let m; while((m=re.exec(f.text))){ const raw=m[0].replace(/,/g,''); const v=parseFloat(raw); const next=f.text[m.index+m[0].length]; if(v>=1990&&v<=2035&&raw.length===4) continue; if(v<10&&next!=='%') continue; if(ALLOW&&!ALLOW.has(v)){ odd.add(m[0]); if(!oddPath) oddPath=f.path; } } });
+  if(odd.size) add(warnings,'nums',`These numbers are not in your confirmed list: ${[...odd].join(', ')}. Keep them only if they are true and approved.`,oddPath);
+  const text=filled.join(' ');
+  const words=(text.match(/\S+/g)||[]).length;
+  if(words>350) add(warnings,'llen',`The letter body has ${words} words. A letter of 250 to 350 words is easier to read.`,'body.0');
+  const co=String((meta&&meta.company)||'').trim();
+  if(co&&filled.length&&!text.toLowerCase().includes(co.toLowerCase())) add(warnings,'lco',`The letter does not name ${co}.`,'body.0');
+  if(info&&info.pages>1) add(warnings,'lpages','The letter is longer than one page. Cut it to one page.');
+  const kw=(posting&&posting.trim().length>40)?analyze(posting,text):null;
+  return {errors,warnings,kw,info};
+}
+/*LOGIC_END*/
+</script>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const KEY='shapeshft-workbench.v1';
+const HASAI=!!(window.claude&&window.claude.use);
+let R=normalizeResume(STARTER), POSTING='', META=clone(STARTER.meta), STATUS='draft', SEL=null, TAB='checks', TPL='t1';
+let L=null, DOC='resume', LCHECKS=null, LINFO=null, REC=null;
+const ROOT=()=>DOC==='letter'?L:R;
+let VISW=[]; let IGN=new Set(); try{ IGN=new Set(JSON.parse(localStorage.getItem('shapeshft-workbench.ignored')||'[]')); }catch(_){}
+let CHECKS=null, INFO=null; const CHAT={}; let busy=false, ctl=null, MIRROR=false, MALL=null, MUNDO=null, MBUSY=false, HIDE={skills:false,certs:false,edu:false};
+let ISEX=true, COPYP=null;
+let SCAN=null, SBUSY=false, FULLREV=false, PENDING=false;
+
+/* ---------- storage (per-viewer convenience only) ---------- */
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify({R,L,POSTING,META,STATUS,TPL,HIDE,ISEX})); }catch(e){} }
+function restore(){ try{ const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&s.R&&s.R.exp){R=s.R;R.extras=normExtras(R.extras);R.edu=R.edu||[];R.checks=normChecks(R.checks);ISEX=!!s.ISEX;L=s.L?normalizeLetter(s.L):null;POSTING=s.POSTING||'';META=s.META||META;STATUS=s.STATUS==='approved'?'approved':'draft';TPL=s.TPL==='t2'?'t2':'t1';if(s.HIDE)HIDE={skills:!!s.HIDE.skills,certs:!!s.HIDE.certs,edu:!!s.HIDE.edu};} }catch(e){} }
+const debounce=(fn,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};};
+let toastT; function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3200);}
+
+/* ---------- the sheet ---------- */
+function renderPaper(){
+  if(DOC==='letter')return renderLetterPaper();
+  $('#paper').classList.remove('letter');
+  const lock=STATUS==='approved';
+  const paper=$('#paper'); paper.classList.toggle('locked',lock); paper.classList.toggle('t2',TPL==='t2');
+  const ed=(p)=>`<span class="ed" data-path="${p}" contenteditable="${lock?'false':'true'}" spellcheck="true">${esc(getP(R,p))}</span>`;
+  const ctlb=(k,i,j)=>`<span class="ctl" contenteditable="false"><button type="button" data-act="up" data-k="${k}" data-i="${i}" data-j="${j==null?'':j}" title="Move up" aria-label="Move up">&uarr;</button><button type="button" data-act="down" data-k="${k}" data-i="${i}" data-j="${j==null?'':j}" title="Move down" aria-label="Move down">&darr;</button><button type="button" data-act="del" data-k="${k}" data-i="${i}" data-j="${j==null?'':j}" title="Delete" aria-label="Delete">&times;</button></span>`;
+  const addb=(k,i,label)=>`<button type="button" class="addb" contenteditable="false" data-act="add" data-k="${k}" data-i="${i}" data-j="${k==='bullet'?(R.exp[i].bullets.length-1):''}">+ ${label}</button>`;
+  let h=`<h1 class="p-name">${ed('name')}</h1><p class="p-title">${ed('title')}</p><div class="p-band">${ed('contact')}</div>`;
+  h+=`<h2 class="p-h">Professional Summary</h2><p class="p-sum">${ed('summary')}</p>`;
+  const hidb=(k,label)=>R[k].length?'':`<button type="button" class="addb" contenteditable="false" data-act="hidesec" data-k="${k}">Remove empty ${label} section</button>`;
+  if(R.skills.length||!HIDE.skills){
+    h+=`<h2 class="p-h">Core Skills</h2>`;
+    R.skills.forEach((s,i)=>{h+=`<div class="p-skill"><b>${ed(`skills.${i}.label`)}:</b> ${ed(`skills.${i}.value`)}${ctlb('skill',i)}</div>`;});
+    h+=`<div class="paper-add">${addb('skill',0,'Add skills row')} ${hidb('skills','Core Skills')}</div>`;
+  }
+  h+=`<h2 class="p-h">Work Experience</h2>`;
+  groupsOf(R.exp).forEach(g=>{
+    const f=g.idx[0], l=g.idx[g.idx.length-1], multi=g.idx.length>1;
+    h+=`<div class="p-group"><div class="p-rorg p-org"><span>${ed(`exp.${f}.org`)}</span>${multi?`<span class="p-date">${esc(R.exp[l].start)} - ${esc(R.exp[f].end)}</span>`:''}</div>`;
+    g.idx.forEach(i=>{
+      const e=R.exp[i];
+      h+=`<div class="p-role"><div class="p-rtitle"><span>${ed(`exp.${i}.title`)}</span><span class="p-date">${ed(`exp.${i}.start`)} - ${ed(`exp.${i}.end`)}</span>${ctlb('role',i)}</div><ul>`;
+      e.bullets.forEach((b,j)=>{h+=`<li>${ed(`exp.${i}.bullets.${j}`)}${ctlb('bullet',i,j)}</li>`;});
+      h+=`</ul>${addb('bullet',i,'Add bullet')}</div>`;
+    });
+    h+=`</div>`;
+  });
+  if(R.edu.length||!HIDE.edu){
+    h+=`<h2 class="p-h">Education</h2>`;
+    R.edu.forEach((d,i)=>{h+=`<div class="p-row"><span>${ed(`edu.${i}.name`)}, ${ed(`edu.${i}.org`)}</span><span>${ed(`edu.${i}.date`)}</span>${ctlb('edu',i)}</div>`;});
+    h+=`<div class="paper-add">${addb('edu',0,'Add education')} ${hidb('edu','Education')}</div>`;
+  }
+  if(R.certs.length||!HIDE.certs){
+    h+=`<h2 class="p-h">Certifications</h2>`;
+    R.certs.forEach((c,i)=>{h+=`<div class="p-row"><span>${ed(`certs.${i}.name`)}</span><span>${ed(`certs.${i}.date`)}</span>${ctlb('cert',i)}</div>`;});
+    h+=`<div class="paper-add">${addb('cert',0,'Add certification')} ${hidb('certs','Certifications')}</div>`;
+  }
+  const back=[['skills','Core Skills'],['edu','Education'],['certs','Certifications']].filter(x=>!R[x[0]].length&&HIDE[x[0]]);
+  if(back.length) h+=`<div class="paper-add">${back.map(x=>`<button type="button" class="addb" contenteditable="false" data-act="showsec" data-k="${x[0]}">+ Restore ${x[1]} section</button>`).join(' ')}</div>`;
+  const X=R.extras;
+  if(X.salary) h+=`<div class="p-sal"><b>Salary requirement:</b> ${ed('extras.salaryText')}</div>`;
+  if(X.references){
+    h+=`<h2 class="p-h">References</h2>`;
+    X.refs.forEach((f,i)=>{ h+=`<div class="p-ref"><div><b>${ed(`extras.refs.${i}.name`)}</b>, ${ed(`extras.refs.${i}.role`)}, ${ed(`extras.refs.${i}.company`)}</div><div>Phone: ${ed(`extras.refs.${i}.phone`)} | Email: ${ed(`extras.refs.${i}.email`)}</div><div>Relationship: ${ed(`extras.refs.${i}.rel`)}</div>${ctlb('ref',i)}</div>`; });
+    h+=`<div class="paper-add">${addb('ref',0,'Add reference')}</div>`;
+  }
+  if(X.recommendation) h+=`<div class="p-recnote" contenteditable="false">${REC?`Letter of recommendation: ${esc(REC.name)} (${REC.pages} page${REC.pages>1?'s':''}). It is added as the last page${REC.pages>1?'s':''} of the PDF. This note does not print.`:'Letter of recommendation: no PDF chosen yet. Choose the file in the Extras tab.'}</div>`;
+  paper.innerHTML=h;
+  markSel(); fitPaper();
+}
+function renderLetterPaper(){
+  const lock=STATUS==='approved';
+  const paper=$('#paper'); paper.classList.toggle('locked',lock); paper.classList.toggle('t2',TPL==='t2'); paper.classList.add('letter');
+  if(!L){
+    paper.innerHTML=`<div class="letter-empty"><p>There is no cover letter for this job yet.</p><p>Your AI assistant writes one when the posting asks for it, or when a person will read it. Paste the JSON with the letter in the Load tab, or start a blank letter here.</p><button type="button" class="btn" id="addLetter">Start a blank letter</button></div>`;
+    fitPaper(); return;
+  }
+  const ed=p=>`<span class="ed" data-path="${p}" contenteditable="${lock?'false':'true'}" spellcheck="true">${esc(getP(L,p))}</span>`;
+  const ctlb=i=>`<span class="ctl" contenteditable="false"><button type="button" data-act="up" data-k="para" data-i="${i}" data-j="" title="Move up" aria-label="Move up">&uarr;</button><button type="button" data-act="down" data-k="para" data-i="${i}" data-j="" title="Move down" aria-label="Move down">&darr;</button><button type="button" data-act="del" data-k="para" data-i="${i}" data-j="" title="Delete" aria-label="Delete">&times;</button></span>`;
+  let h=`<h1 class="p-name">${esc(R.name)}</h1><p class="p-title">${esc(R.title)}</p><div class="p-band">${esc(R.contact)}</div>`;
+  h+=`<p class="p-greet">${ed('greeting')}</p>`;
+  L.body.forEach((t,i)=>{h+=`<p class="p-lp">${ed('body.'+i)}${ctlb(i)}</p>`;});
+  h+=`<div class="paper-add"><button type="button" class="addb" contenteditable="false" data-act="add" data-k="para" data-i="0" data-j="">+ Add paragraph</button> <button type="button" class="addb" contenteditable="false" data-act="rmletter">Remove this letter</button></div>`;
+  h+=`<p class="p-sign">${ed('closing')}</p><p class="p-signname">${esc(R.name)}</p>`;
+  paper.innerHTML=h; markSel(); fitPaper();
+}
+function markSel(){ document.querySelectorAll('.ed.sel').forEach(e=>e.classList.remove('sel')); if(SEL){ const e=document.querySelector(`.ed[data-path="${SEL}"]`); if(e) e.classList.add('sel'); } }
+function fitPaper(){
+  const box=$('#paperbox'), paper=$('#paper'); paper.style.transform='none';
+  const full=816, avail=box.clientWidth, s=Math.min(1,avail/full);
+  paper.style.transform=s<1?`scale(${s})`:'none';
+  box.style.height=(paper.offsetHeight*s)+'px';
+}
+window.addEventListener('resize',debounce(fitPaper,100));
+if(window.ResizeObserver){ new ResizeObserver(()=>{ const p=$('#paper'),b=$('#paperbox'); const s=Math.min(1,b.clientWidth/816); b.style.height=(p.offsetHeight*s)+'px'; }).observe($('#paper')); }
+
+const arrFor=(k,i)=>k==='edu'?R.edu:k==='ref'?R.extras.refs:k==='para'?L.body:k==='bullet'?R.exp[i].bullets:k==='skill'?R.skills:k==='role'?R.exp:R.certs;
+function act(a,k,i,j){
+  const arr=arrFor(k,i), idx=k==='bullet'?j:i;
+  if(a==='del'){ arr.splice(idx,1); }
+  else if(a==='up'&&idx>0){ [arr[idx-1],arr[idx]]=[arr[idx],arr[idx-1]]; }
+  else if(a==='down'&&idx<arr.length-1){ [arr[idx+1],arr[idx]]=[arr[idx],arr[idx+1]]; }
+  else if(a==='add'){
+    if(k==='bullet') arr.push('New bullet.');
+    else if(k==='skill') arr.push({label:'Label',value:'Value.'});
+    else if(k==='cert') arr.push({name:'Certificate name',date:'MM/YYYY'});
+    else if(k==='para') arr.push('New paragraph.');
+    else if(k==='edu') arr.push({name:'Degree, diploma or program',org:'School',date:'YYYY'});
+    else if(k==='ref') arr.push(clone(BLANK_REF));
+  }
+  SEL=null; renderPaper(); changed(); renderDiscuss();
+}
+
+/* ---------- paper events ---------- */
+const paper=$('#paper');
+paper.addEventListener('input',e=>{
+  const el=e.target.closest('.ed'); if(!el||STATUS==='approved')return;
+  const v=el.textContent.replace(/\s+/g,' '), om=DOC==='resume'&&el.dataset.path.match(/^exp\.(\d+)\.org$/);
+  if(om){ const g=groupsOf(R.exp).find(x=>x.idx.includes(+om[1])); (g?g.idx:[+om[1]]).forEach(i=>R.exp[i].org=v); }
+  else setP(ROOT(),el.dataset.path,v);
+  changed();
+});
+paper.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); } });
+paper.addEventListener('paste',e=>{ const el=e.target.closest('.ed'); if(!el)return; e.preventDefault(); const t=((e.clipboardData||window.clipboardData).getData('text')||'').replace(/\s+/g,' '); document.execCommand('insertText',false,t); });
+paper.addEventListener('focusin',e=>{ const el=e.target.closest('.ed'); if(!el||STATUS==='approved'||DOC==='letter')return; SEL=el.dataset.path; markSel(); renderDiscuss(); });
+paper.addEventListener('click',e=>{
+  if(e.target.id==='addLetter'){ L={greeting:'Dear Hiring Team,',body:['','',''],closing:'Sincerely,'}; renderPaper(); changed(); return; }
+  const b=e.target.closest('[data-act]'); if(!b||STATUS==='approved')return;
+  if(b.dataset.act==='hidesec'||b.dataset.act==='showsec'){ HIDE[b.dataset.k]=b.dataset.act==='hidesec'; renderPaper(); changed(); toast(b.dataset.act==='hidesec'?'Section removed. Use Restore at the bottom of the sheet to bring it back.':'Section restored.'); return; }
+  if(b.dataset.act==='rmletter'){ L=null; renderPaper(); changed(); renderStatus(); toast('Letter removed.'); return; } act(b.dataset.act,b.dataset.k,+b.dataset.i,b.dataset.j===''?null:+b.dataset.j); });
+
+/* ---------- checks ---------- */
+const changed=debounce(()=>{ recheck(); save(); },250);
+function recheck(){
+  setCheckConfig(R);
+  if(window.jspdf){ try{ const o=buildPdf(window.jspdf.jsPDF,R,META,TPL); INFO={pages:o.pages,fill:o.fill,wraps:o.wraps,top:o.top,rec:REC?{name:REC.name,pages:REC.pages}:null};
+    if(L){ const lo=buildPdf(window.jspdf.jsPDF,R,META,TPL,null,L); LINFO={pages:lo.pages,fill:lo.fill}; } else LINFO=null; }catch(e){ INFO=null; LINFO=null; console.error(e);} }
+  CHECKS=runChecks(Object.assign({},R,{meta:META}),POSTING,INFO); LCHECKS=runLetterChecks(L,R,POSTING,META,LINFO);
+  renderChecks(); renderFit(); renderTabCounts();
+}
+function renderFit(){
+  const I=DOC==='letter'?LINFO:INFO; const f=$('#fit'); if(DOC==='letter'&&!L){ f.textContent=''; return; } if(!I){ f.textContent='PDF preview library not loaded'; return; }
+  const pct=Math.round(I.fill*100);
+  const recNote=(DOC==='resume'&&R.extras.recommendation&&REC)?`<span>+ ${REC.pages} page${REC.pages>1?'s':''} of recommendation</span>`:'';
+  f.innerHTML=`<span>PDF: ${I.pages} page${I.pages>1?'s':''}${I.pages===1?'':' (last page '+pct+'% full)'}</span>${I.pages===1?`<i><b style="width:${pct}%"></b></i><span>${pct}% full</span>`:''}${recNote}`;
+}
+const cur=()=>DOC==='letter'?(LCHECKS||{errors:[],warnings:[],kw:null}):CHECKS;
+function renderTabCounts(){
+  const n=$('#nChecks'); const C=cur(); const e=C.errors.length, w=C.warnings.filter(x=>!IGN.has(ikey(x))).length;
+  n.className='n'+(e?' bad':w?' warn':''); n.textContent=e?e:(w?w:'OK');
+  const ne=[R.extras.references,R.extras.recommendation,R.extras.salary].filter(Boolean).length; $('#nExtras').textContent=ne?ne+' on':'';
+}
+const TODO={lnone:'Write at least one paragraph.',lempty:'Write the paragraph, or delete it with the x button.',lpara:'Split it into two shorter paragraphs.',lplace:'Replace the placeholder with the real text.',llen:'Cut it to 250 to 350 words.',lco:'Name the company in the first paragraph.',lpages:'Cut lines until it fits on one page.',contact:'Add your email address or phone number to the contact line.',ascii:'Click "Fix characters now" below.',banned:'Delete or reword it. If this is part of your experience after all, tell your AI assistant so it can update your career profile and the checks list.',date:'Type the date as MM/YYYY, for example 09/2023.',empty:'Add a bullet, or delete this role.',nums:'Check that each number is true. If it is, click Ignore, and ask your AI assistant to add it to your confirmed numbers.',long:'Split it into two bullets, or cut words.',sumlen:'Cut words until it is about four lines.',verb:'Start with a capital action verb, such as Led or Built.',watch:'Reword it, or click Ignore if it is accurate.',title:'Shorten the headline.',pages:'Cut lines until the fit meter is under 100%.',ptense:'Change the first verb to the past tense, for example "Led" instead of "Lead".',repverb:'Change the first verb in one or two of these bullets.',manyb:'Merge or cut bullets until this role has 6 or fewer.',oldheavy:'Move a point to a recent role, or cut one bullet from this older role.',wrap3:'Cut words until the bullet fits on two lines.',dense:'Cut a few words or one weak bullet.',toptitle:'Put the posting title in the headline, word for word.',top3:'Move the posting\'s own phrases into the headline or the start of the summary. Use only the ones that are true for you.',sparse:'Add a confirmed proof point, or click Ignore if the page is complete.',salone:'Click the salary line on the sheet and write a range, for example $52,000 to $60,000.',recmiss:'Open the Extras tab and choose the PDF, or turn the option off.',refblank:'Click the reference on the sheet and add the missing phone number or email.'};
+const ikey=it=>it.id+'|'+(it.path||'')+'|'+it.msg;
+function saveIgn(){ try{ localStorage.setItem('shapeshft-workbench.ignored',JSON.stringify([...IGN])); }catch(_){} }
+function issueHtml(kind,it,i){
+  const tag=kind==='bad'?'FIX':'CHECK';
+  let pv=''; if(it.path){ try{ pv=String(getP(ROOT(),it.path)||''); }catch(_){} }
+  if(pv.length>110) pv=pv.slice(0,107)+'...';
+  const line=pv?`<span class="pv">${esc(pv)}</span>`:'';
+  const todo=TODO[it.id]?`<span class="todo"><b>What to do:</b> ${esc(TODO[it.id])}</span>`:'';
+  const ign=kind==='warn'?`<button type="button" class="btn sm ign" data-ign="${i}">Ignore</button>`:'';
+  return `<div class="issue ${kind}"><span class="tag">${tag}</span><span class="iwrap"><button type="button" class="ibody" data-jump="${esc(it.path||'')}"><span class="msg">${esc(it.msg)}</span>${line}${todo}</button>${ign}</span></div>`;
+}
+function renderChecks(){
+  const c=cur(), p=$('#p-checks'); let h='';
+  const vis=c.warnings.filter(x=>!IGN.has(ikey(x))); VISW=vis; const nIgn=c.warnings.length-vis.length;
+  h+=`<section><h3>${DOC==='letter'?'Cover letter':'Resume'} checks</h3><p class="hint">Red <b>FIX</b> items break one of your resume rules. You can fix them, or approve anyway. Yellow <b>CHECK</b> items are advice only. Click an item to jump to its line. The checks run on your own device. Nothing is sent anywhere.</p>`;
+  if(!c.errors.length&&!vis.length) h+=`<p class="okline">All checks pass.</p>`;
+  if(c.errors.length) h+=`<p class="chkh">FIX items (${c.errors.length})</p>`+c.errors.map((x,i)=>issueHtml('bad',x,i)).join('');
+  if(PENDING&&STATUS!=='approved'&&fixCount()) h+=`<div class="opt"><p><b>${fixCount()} FIX item${fixCount()>1?'s':''} remain${fixCount()>1?'':'s'}${L?' across the resume and letter':''}.</b> You can approve and download with them on the page.</p><button class="btn primary sm" type="button" id="approveAnyway">Approve anyway</button></div>`;
+  if(vis.length) h+=`<p class="chkh">Worth a look (${vis.length})</p>`+vis.map((x,i)=>issueHtml('warn',x,i)).join('');
+  if(c.warnings.some(x=>x.fix==='ascii')) h+=`<div class="row"><button class="btn sm" type="button" id="fixAscii">Fix characters now</button></div>`;
+  if(nIgn) h+=`<div class="row"><button class="btn sm" type="button" id="unIgn">Show ${nIgn} ignored item${nIgn>1?'s':''}</button></div>`;
+  h+=`</section>`;
+  if(DOC!=='letter'&&c.top){
+    const tchips=(arr,cls)=>arr.length?`<div class="kw">${arr.map(x=>`<span class="${cls}">${esc(x.term)}${x.confirmed?'':' *'}</span>`).join('')}</div>`:'<p class="hint">None.</p>';
+    h+=`<section><h3>First 3 lines</h3><p class="hint">Recruiters scan the headline and the first two lines of the summary. These should use the posting's own words.</p>`;
+    if(c.top.lines) h+=`<pre class="plain">${esc(c.top.lines.join('\n'))}</pre>`;
+    h+=`<p class="hint"><b>Posting phrases in these lines</b></p>${tchips(c.top.hit,'hit')}<p class="hint"><b>Posting phrases not in these lines</b> (* = not in your confirmed list; use it only if it is true)</p>${tchips(c.top.miss,'miss')}</section>`;
+  }
+  h+=`<section><h3>Posting keywords</h3>`;
+  if(!c.kw) h+=`<p class="hint">Paste the job posting in the Posting tab to see which of the posting's terms your resume covers.</p>`;
+  else{
+    const chips=(arr,cls)=>arr.length?`<div class="kw">${arr.map(t=>`<span class="${cls}">${esc(t)}</span>`).join('')}</div>`:'<p class="hint">None.</p>';
+    h+=`<p class="hint"><b>On the resume</b></p>${chips(c.kw.hit,'hit')}`;
+    h+=`<p class="hint"><b>True for you, not on the resume.</b> Add where it fits.</p>${chips(c.kw.miss,'miss')}`;
+    h+=`<p class="hint"><b>Your career profile says you do not have these.</b> Do not add them. If that has changed, tell your AI assistant.</p>${chips(c.kw.gaps,'gap')}`;
+    if(c.kw.themes.length) h+=`<p class="hint"><b>Frequent in the posting, not on the resume</b></p>${chips(c.kw.themes,'theme')}`;
+  }
+  h+=`</section>`;
+  h+=`<section><details><summary>What an ATS reads (plain text order)</summary><pre class="plain">${esc(DOC==='letter'?letterPlain(R,L):toPlain(normalizeResume(R)))}</pre></details></section>`;
+  p.innerHTML=h;
+}
+$('#p-checks').addEventListener('click',e=>{
+  if(e.target.dataset&&e.target.dataset.ign!==undefined){ const it=VISW[+e.target.dataset.ign]; if(it){ IGN.add(ikey(it)); saveIgn(); renderChecks(); renderTabCounts(); } return; }
+  if(e.target.id==='approveAnyway'){ approve(true); return; }
+  if(e.target.id==='unIgn'){ IGN.clear(); saveIgn(); renderChecks(); renderTabCounts(); return; }
+  if(e.target.id==='fixAscii'){ if(DOC==='letter')L=normalizeLetter(L); else R=normalizeResume(R); renderPaper(); changed(); toast('Characters fixed.'); return; }
+  const b=e.target.closest('[data-jump]'); if(!b||!b.dataset.jump)return; focusPath(b.dataset.jump);
+});
+function focusPath(p){ const el=document.querySelector(`.ed[data-path="${p}"]`); if(!el)return; el.scrollIntoView({block:'center',behavior:'smooth'}); if(STATUS!=='approved') el.focus(); }
+
+/* ---------- tabs ---------- */
+function setTab(t){
+  TAB=t; document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t));
+  ['checks','discuss','posting','map','extras','load'].forEach(n=>$('#p-'+n).hidden=(n!==t));
+  if(t==='discuss')renderDiscuss(); if(t==='map')renderMap(); if(t==='load')renderLoad(); if(t==='posting')renderPosting(); if(t==='extras')renderExtras();
+}
+document.querySelector('.tabs').addEventListener('click',e=>{ const b=e.target.closest('.tab'); if(b)setTab(b.dataset.tab); });
+
+/* ---------- posting ---------- */
+function renderPosting(){
+  const p=$('#p-posting'); if(p.dataset.ready)return; p.dataset.ready='1';
+  p.innerHTML=`<section><h3>Job posting</h3><p class="hint">Paste the full posting. The Checks tab compares its terms with your resume. AI requests about a line include the first part of this text.</p><textarea id="postingText" rows="14" aria-label="Job posting text" placeholder="Paste the job posting here"></textarea></section>`;
+  $('#postingText').value=POSTING;
+  $('#postingText').addEventListener('input',e=>{ POSTING=e.target.value; changed(); });
+}
+
+/* ---------- requirements map (supplied by Claude in chat) ---------- */
+function renderMap(){
+  const p=$('#p-map'), m=R.map||[];
+  if(!m.length){ p.innerHTML=`<section><h3>Posting requirements map</h3><p class="hint">Empty. When your AI assistant builds a resume, it also returns a map: each requirement in the posting, where your history covers it, and any gap. Load that JSON in the Load tab to see it here.</p></section>`; return; }
+  const cnt={covered:0,partial:0,gap:0}; m.forEach(x=>{ if(cnt[x.status]!=null)cnt[x.status]++; });
+  p.innerHTML=`<section><h3>Posting requirements map</h3><p class="hint">${cnt.covered} covered, ${cnt.partial} partly covered, ${cnt.gap} gap${cnt.gap===1?'':'s'}.</p>`+m.map(x=>`<div class="map-item"><span class="pill ${esc(x.status)}">${esc(x.status)}</span>${esc(x.req)}${x.where?`<div class="hint">Covered in: ${esc(x.where)}</div>`:''}${x.note?`<div class="hint">${esc(x.note)}</div>`:''}</div>`).join('')+`</section>`;
+}
+
+/* ---------- discuss (Claude on one line, on demand) ---------- */
+const RULES=`You help a job seeker edit one line of their resume. Follow these rules exactly.
+1. Use only facts that are already in the line or that the candidate states in their message. Never add a tool, number, title, employer, result or claim.
+2. If the request needs a fact you do not have, say what you need in "note" and return no rewrites.
+3. Plain ASCII only. No em dashes, no en dashes, no curly quotes. Straight hyphens are fine.
+4. Work at past employers is written in the past tense. Never imply the candidate still works somewhere they have left.
+5. Start bullets with an action verb. Keep a bullet under 45 words. Use the posting's own words only where the fact is already true.
+6. Write in plain, direct English with no filler or buzzwords.`;
+const MIRRORRULE=`7. MIRROR MODE. Follow the posting's sentence pattern. Reuse its verb and noun phrases, but only where the fact is already true for the candidate. Example: the posting says "partner with Product to resolve bugs", so write "Partnered with Product to resolve bugs". Keep the candidate's facts and numbers. Do not copy whole sentences. Do not copy claims from the posting that the candidate has not confirmed.`;
+const ALIGNRULE=`8. ALIGNMENT. This is a summary. Show fit, not only excitement. Name two or three things the candidate did that match the posting's top needs, in the posting's words. A few words of interest may follow a concrete match. Do not end on excitement alone.`;
+const FREERULE=`9. FREE REBUILD. This is the summary. Ignore any fixed summary structure. Write a clear, recruiter-friendly summary: the candidate's experience, strengths and career direction, in 3 to 4 lines and under 650 characters. You may use any fact in the RESUME TEXT below, but nothing outside it. This widens rule 1 to the resume text only. Rules 2 to 4 still apply.`;
+function fieldAt(p){ return fields(R).find(f=>f.path===p)||null; }
+
+/* ---------- recruiter scan (Version 9): read-only first impression ---------- */
+const SCANRULES=`You are an experienced recruiter for the kind of role in the job posting. You review resumes under time pressure. Read this resume the way you would in the first 10 seconds: the headline, the summary, the most recent role title and its first bullets, and the dates.
+Rules:
+1. Judge only what is on the page. Do not rewrite lines.
+2. Never suggest adding a tool, number, title, employer or result that is not already on the resume. If a fix needs a new fact, say "This needs a fact from you."
+3. Name each weak spot by its line id, for example L4.
+4. Plain English. Short sentences. No idioms. No em dashes.
+5. The first 3 lines (the headline and the first two lines of the summary) matter most. If a posting is given, say in title_note whether those lines use the posting's own words and exact title. If an important posting phrase is missing from them, name it as a weak spot on L1 or L2.
+6. This is an AI opinion, not an applicant tracking system result. Do not predict whether the candidate will get an interview.`;
+const FULLRULE=`FULL REVIEW. Also list problems in three groups. grammar: grammar, tense, punctuation and parallel structure. achievements: bullets that show activity but no outcome or result. clarity: vague, crowded or confusing lines. Do not report ATS formatting, keywords or length, because code already checks those.`;
+function scanLines(){
+  const a=[]; const push=(path,where,text)=>a.push({id:'L'+(a.length+1),path,where,text:String(text||'')});
+  push('title','Headline',R.title); push('summary','Professional Summary',R.summary);
+  (R.skills||[]).forEach((k,i)=>push(`skills.${i}.value`,'Core Skills: '+k.label,k.label+': '+k.value));
+  (R.exp||[]).forEach((e,i)=>{ push(`exp.${i}.title`,'Role',`${e.title} | ${e.org} | ${e.start} - ${e.end}`); (e.bullets||[]).forEach((b,j)=>push(`exp.${i}.bullets.${j}`,`Bullet ${j+1}, ${e.title}`,b)); });
+  (R.certs||[]).forEach((c,i)=>push(`certs.${i}.name`,'Certification',`${c.name} | ${c.date}`));
+  return a;
+}
+async function runScan(){
+  if(SBUSY)return;
+  const sample=await getSample();
+  const lines=scanLines(); const hasPost=!!(POSTING&&POSTING.trim().length>40);
+  const prompt=`${SCANRULES}${FULLREV?'\n'+FULLRULE:''}\n\n${hasPost?'JOB POSTING:\n'+POSTING.slice(0,6000):'JOB POSTING: none. Judge against the headline. Use "none" for title_match.'}\n\nRESUME, ONE LINE PER ID, IN PAGE ORDER:\n${lines.map(l=>l.id+' ('+l.where+'): '+l.text).join('\n')}\n\nReturn only JSON: {"reads_as":"one sentence that starts: This reads as","title_match":"yes|partial|no|none","title_note":"one sentence","impression":"two short sentences on the 10-second impression","strengths":["three items"],"weak":[{"id":"L2","issue":"one sentence"}],"scannability":"one sentence on how easy the page is to scan and what slows the reader down"${FULLREV?',"grammar":[{"id":"","issue":""}],"achievements":[{"id":"","issue":""}],"clarity":[{"id":"","issue":""}]':''}}. Give at most 3 weak items${FULLREV?' and at most 6 items in each full-review group':''}.`;
+  if(!sample){ showCopy('Recruiter scan',prompt); return; }
+  SBUSY=true; ctl=new AbortController(); renderDiscuss();
+  try{
+    const out=await sample.json(prompt,{cache:false,signal:ctl.signal});
+    const map={}; lines.forEach(l=>map[l.id]=l);
+    const items=arr=>(Array.isArray(arr)?arr:[]).map(x=>({id:String(x&&x.id||''),issue:String(x&&x.issue||'')})).filter(x=>x.issue).map(x=>({...x,line:map[x.id]||null}));
+    SCAN={reads_as:String(out&&out.reads_as||''),title_match:String(out&&out.title_match||'none'),title_note:String(out&&out.title_note||''),impression:String(out&&out.impression||''),strengths:(Array.isArray(out&&out.strengths)?out.strengths:[]).map(String).slice(0,3),weak:items(out&&out.weak).slice(0,3),scannability:String(out&&out.scannability||''),full:FULLREV?{grammar:items(out&&out.grammar),achievements:items(out&&out.achievements),clarity:items(out&&out.clarity)}:null};
+  }catch(e){ toast(errCopy(e)); }
+  SBUSY=false; ctl=null; renderDiscuss();
+}
+function scanHTML(){
+  let h=`<section><h3>Recruiter scan</h3>`;
+  const li=x=>`<div class="opt"><button type="button" class="ibody" data-sjump="${esc(x.line?x.line.path:'')}"><b>${esc(x.line?x.line.where:x.id||'Whole resume')}</b><br>${esc(x.issue)}</button></div>`;
+  if(SCAN){
+    const s=SCAN, tm={yes:'Matches the posting title.',partial:'Partly matches the posting title.',no:'Does not match the posting title.'}[s.title_match]||'';
+    h+=`<p><b>${esc(s.reads_as)}</b></p>`;
+    if(tm||s.title_note) h+=`<p class="hint">${esc(tm)} ${esc(s.title_note)}</p>`;
+    h+=`<p>${esc(s.impression)}</p>`;
+    if(s.strengths.length) h+=`<p class="chkh">What stands out</p><ul>${s.strengths.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+    if(s.weak.length) h+=`<p class="chkh">Weak areas (click to go to the line)</p>`+s.weak.map(li).join('');
+    if(s.scannability) h+=`<p class="chkh">Scannability</p><p>${esc(s.scannability)}</p>`;
+    if(s.full){ [['grammar','Grammar and consistency'],['achievements','Achievements'],['clarity','Clarity']].forEach(([k,t])=>{ h+=`<p class="chkh">${t} (${s.full[k].length})</p>`+(s.full[k].length?s.full[k].map(li).join(''):'<p class="hint">None found.</p>'); }); }
+    h+=`<div class="row"><button class="btn sm" type="button" id="scanRun" ${SBUSY?'disabled':''}>Scan again</button><button class="btn sm" type="button" id="scanClear">Clear</button></div>`;
+  } else {
+    h+=`<p class="hint">See the first 10-second impression a recruiter gets: what the resume reads as, what stands out, and the weak areas. It only reads. It changes nothing. Fix lines with the buttons below.</p>`;
+    h+=`<div class="row"><button class="btn primary sm" type="button" id="scanRun" ${SBUSY?'disabled':''}>${SBUSY?'Scanning...':'Run recruiter scan'}</button>${SBUSY?'<button class="btn sm" type="button" id="chatStop">Stop</button>':''}</div>`;
+  }
+  h+=`<label class="hint"><input type="checkbox" id="fullBox" ${FULLREV?'checked':''}> Full review: also list grammar, achievement and clarity problems</label>`;
+  return h+`</section>`;
+}
+async function getSample(){ try{ return window.claude&&window.claude.use?await window.claude.use('sample'):null; }catch(e){ return null; } }
+const errCopy=e=>({not_granted:'Claude is not allowed for this page. You can still edit lines by hand.',rate_limited:'Too many requests or usage limit reached. Wait a moment and try again.',cancelled:'Stopped.',invalid_json:'Claude did not return a usable answer. Try rephrasing.',upstream_error:'Connection problem. Try again.',empty_completion:'No answer came back. Try rephrasing.'}[e&&e.code]||'Claude is not available right now. You can still edit lines by hand.');
+
+/* ---------- match the whole resume to the posting, one click ---------- */
+const WHOLERULES=RULES.replace('edit one line of their resume','rewrite their whole resume to match one job posting')+'\n'+MIRRORRULE+'\n'+ALIGNRULE.replace('This is a summary.','Apply this to the summary only.');
+const nums=t=>(String(t).match(/\d[\d,.]*/g)||[]).map(x=>x.replace(/[.,]+$/,''));
+function wholeLines(){
+  const a=[];
+  a.push({path:'summary',where:'Professional Summary',text:R.summary,max:650});
+  (R.skills||[]).forEach((k,i)=>a.push({path:`skills.${i}.value`,where:'Core Skills: '+k.label,text:k.value,max:400}));
+  (R.exp||[]).forEach((e,i)=>(e.bullets||[]).forEach((b,j)=>a.push({path:`exp.${i}.bullets.${j}`,where:`Bullet ${j+1}, ${e.title}, ${String(e.org).split('|')[0].trim()}`,text:b,max:300})));
+  return a;
+}
+function wholeHTML(locked){
+  let h=`<section><h3>Match the whole resume</h3>`;
+  if(MALL){
+    const it=MALL.items;
+    h+=`<p class="hint">${esc(MALL.note||'')}</p>`;
+    if(!it.length) h+=`<p class="hint">No line needed a change.</p>`;
+    it.forEach((x,i)=>{ h+=`<div class="opt"><label><input type="checkbox" data-mall="${i}" ${x.on?'checked':''}> <b>${esc(x.where)}</b></label><p class="hint">Before: ${esc(x.old)}</p><p>After: ${esc(x.nw)}</p></div>`; });
+    if(MALL.skipped.length) h+=`<p class="hint">Kept as they were, so no rule was broken: ${MALL.skipped.map(x=>esc(x.where)+' ('+esc(x.why)+')').join('; ')}.</p>`;
+    h+=`<div class="row">${it.length?'<button class="btn primary sm" type="button" id="mallApply">Apply selected lines</button>':''}<button class="btn sm" type="button" id="mallCancel">Cancel</button></div>`;
+  } else {
+    h+=`<p class="hint">One click rewrites the summary, Core Skills and bullets in the posting's own words. It uses only facts already on your resume. You review every change before it is applied.</p>`;
+    h+=`<div class="row"><button class="btn primary sm" type="button" id="mirrorAll" ${(MBUSY||locked)?'disabled':''}>${MBUSY?'Working...':'Match whole resume to the posting'}</button>${MBUSY?'<button class="btn sm" type="button" id="chatStop">Stop</button>':''}${MUNDO?'<button class="btn sm" type="button" id="mallUndo">Undo last match</button>':''}</div>`;
+    if(locked) h+=`<p class="hint">Reopen the resume to make changes.</p>`;
+  }
+  return h+`</section>`;
+}
+async function mirrorAll(){
+  if(MBUSY||STATUS==='approved')return;
+  if(!POSTING||POSTING.trim().length<=40){ toast('Add the job posting in the Posting tab first.'); return; }
+  const sample=await getSample();
+  const lines=wholeLines();
+  const input={summary:R.summary,skills:(R.skills||[]).map(k=>k.value),bullets:(R.exp||[]).map(e=>e.bullets||[])};
+  const prompt=`${WHOLERULES}\n\nJOB POSTING:\n${POSTING.slice(0,6000)}\n\nRESUME TEXT TO REWRITE (JSON):\n${JSON.stringify(input)}\n\nReturn only JSON with the same shape: {"note":"one or two short sentences on what you mirrored","summary":"...","skills":[same number of strings],"bullets":[[same number of strings per role]]}. If a line should not change, return it exactly as it is.`;
+  if(!sample){ showCopy('Match the whole resume to the posting',prompt); return; }
+  MBUSY=true; ctl=new AbortController(); renderDiscuss();
+  try{
+    const out=await sample.json(prompt,{cache:false,signal:ctl.signal});
+    const nw={}; 
+    if(out&&typeof out.summary==='string') nw.summary=out.summary;
+    (Array.isArray(out&&out.skills)?out.skills:[]).forEach((v,i)=>{ if(typeof v==='string'&&i<(R.skills||[]).length) nw[`skills.${i}.value`]=v; });
+    (Array.isArray(out&&out.bullets)?out.bullets:[]).forEach((a,i)=>{ if(Array.isArray(a)&&R.exp[i]) a.forEach((v,j)=>{ if(typeof v==='string'&&j<R.exp[i].bullets.length) nw[`exp.${i}.bullets.${j}`]=v; }); });
+    const items=[], skipped=[];
+    lines.forEach(l=>{
+      if(!(l.path in nw))return;
+      const v=norm(nw[l.path]).trim(); if(!v||v===l.text)return;
+      const oldN=nums(l.text); const bad=nums(v).filter(n=>!oldN.includes(n));
+      if(bad.length){ skipped.push({where:l.where,why:'it added a number'}); return; }
+      if(v.length>l.max){ skipped.push({where:l.where,why:'too long'}); return; }
+      items.push({path:l.path,where:l.where,old:l.text,nw:v,on:true});
+    });
+    MALL={items,skipped,note:String((out&&out.note)||(items.length?'Review the changes below.':''))};
+  }catch(e){ toast(errCopy(e)); }
+  MBUSY=false; ctl=null; renderDiscuss();
+}
+function applyMall(){
+  if(!MALL)return;
+  const undo=[]; MALL.items.forEach(x=>{ if(x.on&&getP(R,x.path)===x.old){ undo.push({path:x.path,old:x.old,nw:x.nw}); setP(R,x.path,x.nw); } });
+  MALL=null; MUNDO=undo.length?undo:null; renderAll();
+  toast(undo.length?`${undo.length} line${undo.length===1?'':'s'} updated. You can still edit each one by hand.`:'No lines were changed.');
+}
+function undoMall(){
+  if(!MUNDO||STATUS==='approved')return; let n=0;
+  MUNDO.forEach(x=>{ if(getP(R,x.path)===x.nw){ setP(R,x.path,x.old); n++; } });
+  MUNDO=null; renderAll(); toast(n?`${n} line${n===1?'':'s'} put back.`:'Those lines were edited since, so nothing was changed.');
+}
+const COPYNOTE='\n\nIMPORTANT: Ignore the JSON format request above. Answer in plain text with short headings, so a person can read it in a chat window. Use only facts from my resume and my career profile.';
+function showCopy(title,prompt){ COPYP={title,text:prompt+COPYNOTE}; renderDiscuss(); const p=$('#p-discuss'); if(p) p.scrollTop=0; }
+function renderDiscuss(){
+  if(TAB!=='discuss')return;
+  const p=$('#p-discuss'); const f=SEL?fieldAt(SEL):null; const key=SEL||'_all'; const thread=CHAT[key]||[];
+  const locked=STATUS==='approved';
+  let h=scanHTML()+wholeHTML(locked);
+  if(!HASAI) h=`<p class="hint">You opened the Workbench outside Claude, so the AI buttons below do not send anything. Each one gives you the request as text instead. Copy it into your AI assistant and type the changes you want on the sheet.</p>`+h;
+  if(COPYP) h=`<section class="copybox"><h3>${esc(COPYP.title)}</h3><p class="hint">Copy this request and paste it into your AI assistant. It includes your resume text and part of the posting. Then type any changes you want into the sheet.</p><textarea id="copyText" rows="8" readonly aria-label="Request to copy">${esc(COPYP.text)}</textarea><div class="row"><button class="btn primary sm" type="button" id="copyPrompt">Copy request</button><button class="btn sm" type="button" id="copyClose">Close</button></div></section>`+h;
+  h+=`<section><h3>${f?'Selected line':'One line at a time'}</h3>`;
+  h+=f?`<div class="selbox"><b>${esc(f.where)}</b><br>${esc(f.text)}</div>`:`<p class="hint">Click a line on the sheet to discuss that line. With no line selected, you can ask about the whole resume. The AI gives advice only. It does not edit the sheet.</p>`;
+  if(f) h+=`<div class="row"><button class="btn sm" type="button" id="clearSel">Clear selection</button></div>`;
+  h+=`<label class="hint"><input type="checkbox" id="mirrorBox" ${MIRROR?'checked':''}> Mirror the posting's wording in every answer</label>`;
+  if(f&&!locked) h+=`<div class="row"><button class="btn sm" type="button" data-quick="mirror">Mirror posting wording</button>${f.kind==='summary'?'<button class="btn sm" type="button" data-quick="align">Show alignment</button><button class="btn sm" type="button" data-quick="free">Rebuild summary freely</button>':''}</div>${f.kind==='summary'?'<p class="hint">"Rebuild summary freely" ignores your summary rules (the opening line, the four parts and the close). It still uses only facts that are on this resume.</p>':''}`;
+  h+=`</section><section><div class="msgs" id="msgs">`;
+  thread.forEach((m,mi)=>{
+    h+=`<div class="msg ${m.role==='user'?'user':'ai'}">${esc(m.content)}`;
+    (m.options||[]).forEach((o,oi)=>{ h+=`<div class="opt"><p>${esc(o)}</p><button class="btn sm primary" type="button" data-use="${mi}:${oi}" ${locked?'disabled':''}>Use this line</button></div>`; });
+    h+=`</div>`;
+  });
+  if(busy) h+=`<div class="msg ai">Thinking...</div>`;
+  h+=`</div><textarea id="chatIn" rows="3" aria-label="Ask your AI assistant about this line" placeholder="${f?'What should change? Example: make this shorter and lead with the result.':'Ask a question about the whole resume.'}" ${locked?'disabled':''}></textarea><div class="row"><button class="btn primary sm" type="button" id="chatSend" ${(busy||locked)?'disabled':''}>${HASAI?'Ask Claude':'Make a request to copy'}</button>${busy?'<button class="btn sm" type="button" id="chatStop">Stop</button>':''}</div><p class="hint">Each question sends only this line, the first part of the posting and the last few messages. ${locked?'Reopen the resume to make changes.':''}</p></section>`;
+  p.innerHTML=h;
+  const m=$('#msgs'); if(m&&m.lastElementChild) m.lastElementChild.scrollIntoView({block:'nearest'});
+}
+$('#p-discuss').addEventListener('click',e=>{
+  if(e.target.id==='clearSel'){ SEL=null; markSel(); renderDiscuss(); return; }
+  if(e.target.id==='copyClose'){ COPYP=null; renderDiscuss(); return; }
+  if(e.target.id==='copyPrompt'){ const t=$('#copyText'); (navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(()=>toast('Copied. Paste it into your AI assistant.'),()=>{ t.select(); toast('Select the text and copy it.'); }); return; }
+  if(e.target.id==='scanRun'){ runScan(); return; }
+  if(e.target.id==='scanClear'){ SCAN=null; renderDiscuss(); return; }
+  if(e.target.id==='fullBox'){ FULLREV=e.target.checked; return; }
+  const sj=e.target.closest('[data-sjump]'); if(sj){ if(sj.dataset.sjump) focusPath(sj.dataset.sjump); return; }
+  if(e.target.id==='mirrorAll'){ mirrorAll(); return; }
+  if(e.target.id==='mallApply'){ applyMall(); return; }
+  if(e.target.id==='mallCancel'){ MALL=null; renderDiscuss(); return; }
+  if(e.target.id==='mallUndo'){ undoMall(); return; }
+  if(e.target.dataset&&e.target.dataset.mall!=null&&MALL){ MALL.items[+e.target.dataset.mall].on=e.target.checked; return; }
+  if(e.target.id==='chatSend'){ ask(); return; }
+  if(e.target.id==='mirrorBox'){ MIRROR=e.target.checked; return; }
+  const qk=e.target.closest('[data-quick]'); if(qk){ ask(qk.dataset.quick); return; }
+  if(e.target.id==='chatStop'){ if(ctl)ctl.abort(); return; }
+  const u=e.target.closest('[data-use]'); if(u&&SEL){ const [mi,oi]=u.dataset.use.split(':').map(Number); const txt=norm(CHAT[SEL][mi].options[oi]); setP(R,SEL,txt); const el=document.querySelector(`.ed[data-path="${SEL}"]`); if(el)el.textContent=txt; changed(); toast('Line updated. You can keep editing it by hand.'); }
+});
+async function ask(quick){
+  const inp=$('#chatIn'); let text=(inp.value||'').trim();
+  if(quick==='mirror') text='Rewrite this line using the posting\'s own wording and sentence pattern.';
+  if(quick==='align') text='Rewrite this summary so it shows how my experience lines up with the posting, not only excitement.';
+  if(quick==='free') text='Rebuild this summary freely. Make my expertise, strengths and career direction clear and easy for a recruiter to read.';
+  if(!text||busy)return;
+  const sample=await getSample(); const key=SEL||'_all'; const thread=(CHAT[key]=CHAT[key]||[]);
+  thread.push({role:'user',content:text}); inp.value='';
+  const f=SEL?fieldAt(SEL):null;
+  const conv=thread.slice(-5).map(t=>(t.role==='user'?'Candidate: ':'You: ')+t.content).join('\n');
+  const prompt=`${RULES}${(MIRROR||quick==='mirror')?'\n'+MIRRORRULE:''}${quick==='align'?'\n'+ALIGNRULE+(MIRROR?'':'\n'+MIRRORRULE):''}${quick==='free'?'\n'+FREERULE+'\n\nRESUME TEXT:\n'+toPlain(normalizeResume(R)).slice(0,6000):''}\n\nJOB POSTING (excerpt):\n${(POSTING||'').slice(0,3500)||'(none provided)'}\n\n`+(f?`LINE TO EDIT (${f.where}):\n${f.text}\n\n`:`SCOPE: whole resume. Current summary: ${R.summary}\n\n`)+`CONVERSATION:\n${conv}\n\nReply with only JSON like {"note":"one or two short sentences","options":[${f?'"rewrite 1","rewrite 2"':''}]}. ${f?'Give 1 or 2 rewrites of the line, or an empty array if you need a fact first.':'The options array must be empty.'}`;
+  if(!sample){ thread.pop(); showCopy('Ask about '+(f?'this line':'the whole resume'),prompt); return; }
+  busy=true; ctl=new AbortController(); renderDiscuss();
+  try{
+    const out=await sample.json(prompt,{cache:false,signal:ctl.signal});
+    thread.push({role:'assistant',content:String((out&&out.note)||''),options:f&&Array.isArray(out&&out.options)?out.options.slice(0,2).map(String):[]});
+  }catch(e){ thread.push({role:'assistant',content:errCopy(e)}); }
+  busy=false; ctl=null; renderDiscuss();
+}
+
+/* ---------- load / save JSON ---------- */
+function renderLoad(){
+  const p=$('#p-load'); if(p.dataset.ready){ $('#jsonOut').value=JSON.stringify(exportObj(),null,1); return; } p.dataset.ready='1';
+  p.innerHTML=`<section><h3>Load a resume from your AI assistant</h3><p class="hint">Give your AI assistant the job posting. It returns one block of JSON. Paste the whole block here, or open a saved .json file.</p><textarea id="jsonIn" rows="6" aria-label="Resume JSON from your AI assistant" placeholder="Paste the JSON block here"></textarea><div class="row"><button class="btn primary sm" type="button" id="loadBtn">Load resume</button><label class="btn sm" for="jsonFile">Open a .json file</label><input type="file" id="jsonFile" accept=".json,application/json,text/plain" hidden></div><p class="hint" id="loadMsg" role="status"></p></section>
+  <section><h3>Copy or save your edits</h3><p class="hint">Copy this JSON into your AI chat if you want your edits kept in the next version. Save it as a file to keep a copy of this application.</p><textarea id="jsonOut" rows="6" readonly aria-label="Current resume JSON"></textarea><div class="row"><button class="btn sm" type="button" id="copyBtn">Copy JSON</button><button class="btn sm" type="button" id="saveJsonBtn">Save as a .json file</button></div></section>
+  <section><h3>Example</h3><p class="hint">The Workbench opens with a fictional example resume. You can bring it back at any time. This replaces what is on the sheet, so save your work first.</p><div class="row"><button class="btn sm" type="button" id="resetBtn">Show the example resume</button></div></section>`;
+  $('#jsonOut').value=JSON.stringify(exportObj(),null,1);
+  const tryLoad=txt=>{ try{ loadJSON(txt); $('#loadMsg').textContent='Loaded. Review each line, then approve.'; }catch(e){ $('#loadMsg').textContent='Could not load: '+e.message+' Ask your AI assistant: "The Workbench could not load this JSON. Please send the complete JSON object again."'; } };
+  $('#loadBtn').addEventListener('click',()=>tryLoad($('#jsonIn').value));
+  $('#jsonFile').addEventListener('change',e=>{ const f=e.target.files&&e.target.files[0]; if(!f)return; const fr=new FileReader(); fr.onload=()=>tryLoad(String(fr.result||'')); fr.onerror=()=>{ $('#loadMsg').textContent='Could not read that file.'; }; fr.readAsText(f); e.target.value=''; });
+  $('#resetBtn').addEventListener('click',()=>{ R=normalizeResume(STARTER); L=null; DOC='resume'; META=clone(STARTER.meta); POSTING=''; STATUS='draft'; SEL=null; MALL=null; MUNDO=null; HIDE={skills:false,certs:false,edu:false}; ISEX=true; syncMeta(); renderAll(); toast('Showing the fictional example resume.'); });
+  $('#copyBtn').addEventListener('click',async()=>{ const t=$('#jsonOut'); try{ await navigator.clipboard.writeText(t.value); toast('Copied.'); }catch(e){ t.select(); toast('Select and copy the text.'); } });
+  $('#saveJsonBtn').addEventListener('click',()=>{ const nm=pdfFileName(META,'Application',R.name).replace(/\.pdf$/,'.json'); blobSave({filename:nm,data:JSON.stringify(exportObj(),null,1)},'application/json'); toast('Saved '+nm+'.'); });
+}
+function exportObj(){
+  const o=clone(R); o.meta={company:META.company,role:META.role}; o.template=TPL; if(L)o.letter=clone(L);
+  const x=o.extras; if(!x.refs.length) delete x.refs;
+  if(!x.references&&!x.recommendation&&!x.salary&&x.salaryText===SAL_DEFAULT&&!x.refs) delete o.extras;
+  const ck=o.checks; if(ck&&!ck.confirmedTerms.length&&!ck.doNotClaim.length&&!ck.confirmedNumbers.length) delete o.checks;
+  if(POSTING&&POSTING.trim()) o.posting=POSTING;
+  return o;
+}
+function loadJSON(txt){
+  let t=String(txt||'').trim(); const m=t.match(/```(?:json)?\s*([\s\S]*?)```/); if(m)t=m[1];
+  let o; try{ o=JSON.parse(t); }catch(e){ throw new Error('this is not valid JSON.'); }
+  const need=['summary','skills','exp']; need.forEach(k=>{ if(o[k]==null) throw new Error('missing "'+k+'".'); });
+  if(!Array.isArray(o.skills)||!Array.isArray(o.exp)) throw new Error('"skills" and "exp" must be lists.');
+  o.exp.forEach((e,i)=>{ if(!e.title||!Array.isArray(e.bullets)) throw new Error('role '+(i+1)+' needs "title" and a "bullets" list.'); e.org=e.org||''; e.start=e.start||''; e.end=e.end||''; });
+  if(o.edu!=null&&!Array.isArray(o.edu)) throw new Error('"edu" must be a list.');
+  R=normalizeResume({name:o.name||'',title:o.title||'',contact:o.contact||'',summary:o.summary,skills:o.skills,exp:o.exp,edu:o.edu||[],certs:o.certs||[],checks:o.checks||{},meta:o.meta||{},extras:o.extras||{},map:o.map||[]});
+  META={company:R.meta.company,role:R.meta.role}; if(o.template==='t1'||o.template==='t2')TPL=o.template; if(typeof o.posting==='string'&&o.posting.length>40)POSTING=o.posting;
+  if(o.letter&&typeof o.letter==='object'){ if(!Array.isArray(o.letter.body)&&typeof o.letter.body!=='string') throw new Error('"letter" needs a "body" list of paragraphs.'); L=normalizeLetter(o.letter); } else L=null;
+  DOC='resume'; STATUS='draft'; PENDING=false; SEL=null; MALL=null; MUNDO=null; HIDE={skills:false,certs:false,edu:false}; ISEX=false; syncMeta(); renderAll();
+}
+
+/* ---------- approve and download ---------- */
+/* FIX items warn but never block: the first Approve shows them; "Approve anyway" approves with them. The user decides. */
+function fixCount(){ return CHECKS.errors.length+(LCHECKS?LCHECKS.errors.length:0); }
+function approve(force){
+  R=normalizeResume(R); if(L)L=normalizeLetter(L); recheck();
+  const bad=CHECKS.errors.length?'resume':(LCHECKS&&LCHECKS.errors.length?'letter':'');
+  if(bad&&!force){ PENDING=true; DOC=bad; renderDocSeg(); setTab('checks'); renderPaper(); renderChecks(); renderFit(); renderTabCounts(); const n=fixCount(); toast(n+' FIX item'+(n>1?'s':'')+' found. Fix them, or click "Approve anyway" in the Checks tab.'); return; }
+  const kept=bad?fixCount():0;
+  PENDING=false; STATUS='approved'; SEL=null; renderAll();
+  toast((kept?`Approved with ${kept} FIX item${kept>1?'s':''} kept. `:'Approved. ')+(L?'The resume and letter are ready to download.':'The PDF is ready to download.'));
+}
+function reopen(){ STATUS='draft'; PENDING=false; renderAll(); }
+/* Inside Claude, files are saved through Claude. Anywhere else, the browser downloads them. */
+function blobSave(f,type){ const b=new Blob([f.data],{type:type||'application/pdf'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=f.filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); }
+async function saveFiles(list){
+  if(!window.jspdf){ toast('The PDF library did not load. Download ShapeShft again, or see the Troubleshooting guide.'); return; }
+  const dl=await (async()=>{ try{ return window.claude&&window.claude.use?await window.claude.use('downloads'):null; }catch(e){ return null; } })();
+  try{
+    for(const f of await list()){ if(dl) await dl.save(f); else blobSave(f); }
+    toast(R.extras.recommendation&&!REC?'Saved without the letter of recommendation, because no PDF is chosen.':(dl?'Saved.':'Saved. Look in your Downloads folder.'));
+  }catch(e){ if(e&&e.code==='declined')toast('Save cancelled.'); else if(e&&e.message==='pdflib')toast('The PDF merge library did not load. Reload the page.'); else if(e&&e.message==='recpdf')toast('Could not add the letter of recommendation. Choose the file again in the Extras tab.'); else toast('Could not save the file.'); }
+}
+/* The letter of recommendation is copied page by page into the end of the PDF. The page never changes it. */
+async function withRec(buf){
+  if(!(R.extras.recommendation&&REC)) return buf;
+  const P=window.PDFLib; if(!P) throw new Error('pdflib');
+  try{
+    const base=await P.PDFDocument.load(buf), rec=await P.PDFDocument.load(new Uint8Array(REC.bytes));
+    (await base.copyPages(rec,rec.getPageIndices())).forEach(p=>base.addPage(p));
+    const out=await base.save(); return out.buffer.slice(out.byteOffset,out.byteOffset+out.byteLength);
+  }catch(e){ throw new Error('recpdf'); }
+}
+async function pdfOf(kind){
+  const J=window.jspdf.jsPDF;
+  if(kind==='letter') return {filename:pdfFileName(META,'Cover-Letter',R.name),data:buildPdf(J,R,META,TPL,null,L).doc.output('arraybuffer')};
+  if(kind==='one'){ const d=buildPdf(J,R,META,TPL,null,L).doc; buildPdf(J,R,META,TPL,d); d.setProperties({title:[R.name,'Cover Letter and Resume',META.company||'',META.role||''].filter(Boolean).join(' - '),author:R.name,subject:'Cover letter and resume',creator:'Resume Workbench'}); return {filename:pdfFileName(META,'Cover-Letter-and-Resume',R.name),data:await withRec(d.output('arraybuffer'))}; }
+  if(kind==='oneR'){ const d=buildPdf(J,R,META,TPL).doc; buildPdf(J,R,META,TPL,d,L); d.setProperties({title:[R.name,'Resume and Cover Letter',META.company||'',META.role||''].filter(Boolean).join(' - '),author:R.name,subject:'Resume and cover letter',creator:'Resume Workbench'}); return {filename:pdfFileName(META,'Resume-and-Cover-Letter',R.name),data:await withRec(d.output('arraybuffer'))}; }
+  return {filename:pdfFileName(META,'Resume',R.name),data:await withRec(buildPdf(J,R,META,TPL).doc.output('arraybuffer'))};
+}
+function download(){
+  if(STATUS!=='approved')return;
+  if(!L){ saveFiles(()=>Promise.all([pdfOf('resume')])); return; }
+  const m=$('#dlmenu'); m.hidden=!m.hidden;
+}
+$('#dlmenu').addEventListener('click',e=>{ const b=e.target.closest('[data-dl]'); if(!b)return; $('#dlmenu').hidden=true; const k=b.dataset.dl; saveFiles(()=>k==='sep'?Promise.all([pdfOf('resume'),pdfOf('letter')]):Promise.all([pdfOf(k)])); });
+document.addEventListener('click',e=>{ if(!e.target.closest('.dlwrap')) $('#dlmenu').hidden=true; });
+function setDoc(d){ DOC=d; SEL=null; renderDocSeg(); renderPaper(); renderChecks(); renderFit(); renderTabCounts(); renderStatus(); }
+function renderDocSeg(){ document.querySelectorAll('[data-doc]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.doc===DOC))); }
+$('#docseg').addEventListener('click',e=>{ const b=e.target.closest('[data-doc]'); if(b&&b.dataset.doc!==DOC)setDoc(b.dataset.doc); });
+function setTpl(t){ TPL=t; renderTpl(); renderPaper(); recheck(); save(); }
+function renderTpl(){ document.querySelectorAll('[data-tpl]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tpl===TPL))); const l=$('#tplLabel'); if(l)l.textContent='Template '+(TPL==='t2'?'2':'1')+' \u00B7 ATS safe'; }
+document.querySelector('.seg[aria-label="Template"]').addEventListener('click',e=>{ const b=e.target.closest('[data-tpl]'); if(b)setTpl(b.dataset.tpl); });
+function renderStatus(){
+  const ok=STATUS==='approved'; const s=$('#status'); s.textContent=ok?'Approved':'Draft'; s.className='chip'+(ok?' ok':'');
+  const a=$('#approve'); a.textContent=ok?'Reopen for edits':'Approve'; a.className='btn'+(ok?'':' primary');
+  $('#download').disabled=!ok; $('#download').textContent=L?'Download':'Download PDF'; if(!ok)$('#dlmenu').hidden=true;
+  const ex=ISEX&&DOC==='resume'?'This is a fictional example. Paste your own resume JSON in the Load tab. ':'';
+  $('#stagehelp').textContent=ex+(ok?'Approved. Lines are locked. Download the PDF, or reopen to keep editing.':(DOC==='letter'?'Click any paragraph to edit it. Hover a paragraph to move or delete it.':'Click any line to edit it. Select a line, then open the Discuss tab for AI help with it.'));
+}
+$('#approve').addEventListener('click',()=>STATUS==='approved'?reopen():approve());
+$('#download').addEventListener('click',download);
+function syncMeta(){ $('#company').value=META.company||''; $('#role').value=META.role||''; }
+['company','role'].forEach(id=>$('#'+id).addEventListener('input',e=>{ META[id]=e.target.value; changed(); }));
+
+/* ---------- Extras tab: references, letter of recommendation, salary ---------- */
+const RECKEY='shapeshft-workbench.rec';
+function bufToB64(buf){ const u=new Uint8Array(buf); let s=''; for(let i=0;i<u.length;i+=32768) s+=String.fromCharCode.apply(null,u.subarray(i,i+32768)); return btoa(s); }
+function b64ToBuf(b){ const s=atob(b), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u.buffer; }
+function saveRec(){ try{ if(REC) localStorage.setItem(RECKEY,JSON.stringify({name:REC.name,pages:REC.pages,b64:bufToB64(REC.bytes)})); else localStorage.removeItem(RECKEY); return true; }catch(e){ return false; } }
+function loadStoredRec(){ try{ const s=JSON.parse(localStorage.getItem(RECKEY)||'null'); if(s&&s.b64) REC={name:s.name,pages:s.pages,bytes:b64ToBuf(s.b64)}; }catch(e){ REC=null; } }
+function renderExtras(){
+  const p=$('#p-extras'); if(!p)return; const X=R.extras;
+  const recLine=REC?`${esc(REC.name)}, ${REC.pages} page${REC.pages===1?'':'s'}`:'No file chosen yet.';
+  p.innerHTML=`<h3>Add to the end of the resume</h3>
+  <p class="hint">All three are off until you turn them on. They change the PDF only. Your saved JSON keeps your choices.</p>
+  <div class="opt extra"><label><input type="checkbox" data-ex="references" ${X.references?'checked':''}> <b>References</b></label>
+    <p class="hint">Adds a References section. Ask each person first, and tell them which job you applied for. Click a line on the sheet to edit it. Hover a reference to remove it.</p></div>
+  <div class="opt extra"><label><input type="checkbox" data-ex="recommendation" ${X.recommendation?'checked':''}> <b>Letter of recommendation</b></label>
+    <p class="hint">Adds your letter as the last pages of the PDF. The page copies it as it is and never edits it. The file stays on your device.</p>
+    <div class="recbox"><input type="file" id="recFile" accept="application/pdf"><p class="hint" id="recStatus" style="margin-left:0">${recLine}</p>${REC?'<button class="btn sm" type="button" id="recRemove">Remove file</button>':''}</div></div>
+  <div class="opt extra"><label><input type="checkbox" data-ex="salary" ${X.salary?'checked':''}> <b>Salary requirement</b></label>
+    <p class="hint">Use this only when the application asks for it. Give a range you would accept. Click the line on the sheet to type it.</p></div>`;
+}
+function recErr(m){ toast(m); const s=$('#recStatus'); if(s)s.textContent=m; }
+function loadRec(file){
+  if(!file)return;
+  if(!window.PDFLib){ recErr('The PDF merge library did not load. Reload the page.'); return; }
+  const fr=new FileReader();
+  fr.onerror=()=>recErr('Could not read that file.');
+  fr.onload=async()=>{
+    try{
+      const bytes=fr.result, doc=await window.PDFLib.PDFDocument.load(bytes.slice(0));
+      REC={name:file.name,pages:doc.getPageCount(),bytes};
+      if(!saveRec()) toast('The file is chosen, but it is too big to remember. Choose it again next time.');
+      recheck(); renderExtras(); renderPaper(); save();
+    }catch(e){ recErr('That file is not a PDF the page can open. Choose another one.'); }
+  };
+  fr.readAsArrayBuffer(file);
+}
+$('#p-extras').addEventListener('change',e=>{
+  const c=e.target.closest('[data-ex]');
+  if(c){ R.extras[c.dataset.ex]=c.checked; if(c.dataset.ex==='references'&&c.checked&&!R.extras.refs.length) R.extras.refs.push(clone(BLANK_REF)); renderPaper(); changed(); renderTabCounts(); return; }
+  if(e.target.id==='recFile') loadRec(e.target.files&&e.target.files[0]);
+});
+$('#p-extras').addEventListener('click',e=>{
+  if(e.target.id==='recRemove'){ REC=null; saveRec(); recheck(); renderExtras(); renderPaper(); save(); }
+});
+
+function renderAll(){ if(TAB==='extras')renderExtras(); renderDocSeg(); renderTpl(); renderPaper(); renderStatus(); recheck(); if(TAB==='discuss')renderDiscuss(); if(TAB==='map')renderMap(); if(TAB==='load'){ const j=$('#jsonOut'); if(j)j.value=JSON.stringify(exportObj(),null,1);} save(); }
+
+loadStoredRec(); restore(); syncMeta(); renderAll(); setTab('checks');
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,14 @@
+Your ShapeShft files
+
+These three files will hold your own information. They start almost empty. Your AI assistant fills them in with you.
+
+- career-profile.md: your professional facts, preferences and stories
+- job-library.md: the jobs you are applying to or practicing with
+- practice-journal.md: notes that keep your conversation practice going
+
+You do not need to edit them yourself. When your AI assistant gives you an updated file, replace the old one here with the new one, and update the copy in your AI project.
+
+Tips:
+- Keep a backup copy somewhere safe, for example in your own cloud storage or on a USB drive.
+- These files are plain text. You can open them with any text editor (Notepad on Windows, TextEdit on a Mac).
+- They contain personal information. Do not post them publicly.

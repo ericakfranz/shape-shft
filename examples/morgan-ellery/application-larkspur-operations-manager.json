@@ -1,0 +1,213 @@
+{
+  "meta": {
+    "company": "Larkspur Outdoor Supply",
+    "role": "Operations Manager"
+  },
+  "template": "t1",
+  "name": "Morgan Ellery",
+  "title": "Operations Manager | Inventory Accuracy | Training and Safety",
+  "contact": "Riverside Falls, OH | 555-555-0142 | morgan.ellery@example.com",
+  "summary": "Distribution center supervisor with 14 years in warehouse operations and more than seven years supervising hourly teams of up to 18 associates. Improved inventory accuracy by cutting discrepancies about 40% with a standard receiving process, and trained most new hires on the receiving dock. Builds staffing schedules to match volume, leads safety walk-throughs, and works with buyers, drivers and store teams to meet shipping deadlines.",
+  "skills": [
+    {
+      "label": "Operations",
+      "value": "daily distribution center operations, receiving, picking, shipping, staffing schedules, shipping deadlines"
+    },
+    {
+      "label": "Inventory",
+      "value": "inventory accuracy, cycle counts, investigating count differences, receiving process improvement"
+    },
+    {
+      "label": "People and Safety",
+      "value": "training and coaching, new hire training, OSHA 10-Hour, safety walk-throughs, forklift trainer"
+    },
+    {
+      "label": "Systems",
+      "value": "warehouse management system (WMS), handheld scanners, Excel, Google Sheets"
+    }
+  ],
+  "exp": [
+    {
+      "title": "Shift Supervisor",
+      "org": "Cedar Ridge Distribution | Riverside Falls, OH",
+      "start": "03/2019",
+      "end": "08/2026",
+      "bullets": [
+        "Reduced inventory discrepancies by about 40% in six months by mapping the receiving process, writing a standard checklist and training six receivers; the checklist became standard on all shifts.",
+        "Supervised second-shift operations with 12 to 18 associates across receiving, picking and loading for a distribution center that served 40 retail stores.",
+        "Built weekly staffing schedules to match volume; no store missed a delivery day from second shift during the 2024 or 2025 peak seasons.",
+        "Trained about 30 new hires on scanners, safe lifting and forklift basics as the main trainer for the receiving dock.",
+        "Led safety walk-throughs and incident reporting for the shift.",
+        "Started written shift handoff notes for damaged freight, late trucks and open issues; first shift adopted them as standard."
+      ]
+    },
+    {
+      "title": "Inventory Lead",
+      "org": "Cedar Ridge Distribution | Riverside Falls, OH",
+      "start": "06/2015",
+      "end": "03/2019",
+      "bullets": [
+        "Ran cycle counts across more than 6,000 storage locations and investigated the causes of count differences with the inventory control manager.",
+        "Resolved short shipments and mislabeled freight with buyers and vendors."
+      ]
+    },
+    {
+      "title": "Warehouse Associate",
+      "org": "Cedar Ridge Distribution | Riverside Falls, OH",
+      "start": "07/2012",
+      "end": "06/2015",
+      "bullets": [
+        "Picked, packed and loaded store orders; earned forklift certification in the first year."
+      ]
+    }
+  ],
+  "edu": [
+    {
+      "name": "High school diploma",
+      "org": "Riverside Falls High School",
+      "date": "2012"
+    }
+  ],
+  "certs": [
+    {
+      "name": "OSHA 10-Hour General Industry",
+      "date": "04/2018"
+    },
+    {
+      "name": "Forklift Operator Trainer",
+      "date": "09/2017"
+    }
+  ],
+  "checks": {
+    "confirmedTerms": [
+      "inventory accuracy",
+      "cycle counts",
+      "staffing schedules",
+      "training",
+      "coaching",
+      "OSHA",
+      "warehouse management system",
+      "WMS",
+      "forklift",
+      "Excel",
+      "Google Sheets",
+      "safety",
+      "receiving",
+      "shipping"
+    ],
+    "doNotClaim": [
+      "SAP",
+      "Six Sigma",
+      "Lean certification",
+      "bachelor",
+      "labor budget",
+      "hiring decisions"
+    ],
+    "confirmedNumbers": [
+      "14",
+      "18",
+      "12",
+      "40",
+      "6,000",
+      "30",
+      "10"
+    ]
+  },
+  "map": [
+    {
+      "req": "5+ years of experience in a warehouse or distribution center",
+      "status": "covered",
+      "where": "Work Experience, all roles",
+      "note": "14 years at Cedar Ridge Distribution."
+    },
+    {
+      "req": "2+ years supervising hourly teams",
+      "status": "covered",
+      "where": "Shift Supervisor bullet 2",
+      "note": "Shift Supervisor since 03/2019, crews of 12 to 18."
+    },
+    {
+      "req": "Lead two shift supervisors and a team of about 45 associates",
+      "status": "partial",
+      "where": "Shift Supervisor bullet 2",
+      "note": "Has supervised up to 18 associates, but not other supervisors. Prepare to talk about developing leads."
+    },
+    {
+      "req": "Experience with a warehouse management system (WMS)",
+      "status": "covered",
+      "where": "Core Skills: Systems",
+      "note": "The company's own WMS. Not SAP."
+    },
+    {
+      "req": "Own inventory accuracy, including cycle count programs and root cause investigation",
+      "status": "covered",
+      "where": "Shift Supervisor bullet 1; Inventory Lead bullet 1",
+      "note": "Checklist cut discrepancies about 40%; ran cycle counts across 6,000+ locations."
+    },
+    {
+      "req": "Build and adjust staffing schedules to match volume",
+      "status": "covered",
+      "where": "Shift Supervisor bullet 3",
+      "note": "Weekly schedules and peak season planning."
+    },
+    {
+      "req": "Experience training and coaching others",
+      "status": "covered",
+      "where": "Shift Supervisor bullet 4",
+      "note": "About 30 new hires trained (user estimate)."
+    },
+    {
+      "req": "Lead safety programs and make sure we follow OSHA requirements",
+      "status": "partial",
+      "where": "Shift Supervisor bullet 5; Certifications",
+      "note": "Shift-level safety walk-throughs and OSHA 10-Hour. Has not run a site-wide safety program."
+    },
+    {
+      "req": "Find and lead continuous improvement projects",
+      "status": "covered",
+      "where": "Shift Supervisor bullets 1 and 6",
+      "note": "Receiving checklist and handoff notes, both adopted on all shifts."
+    },
+    {
+      "req": "Track labor costs and productivity, and help prepare the annual labor budget",
+      "status": "partial",
+      "where": "Shift Supervisor bullet 3",
+      "note": "Built schedules but did not own labor costs or a budget."
+    },
+    {
+      "req": "Comfortable with Excel or Google Sheets",
+      "status": "covered",
+      "where": "Core Skills: Systems",
+      "note": "Schedules and simple tracking."
+    },
+    {
+      "req": "Experience with Lean or other continuous improvement methods (nice to have)",
+      "status": "partial",
+      "where": "Shift Supervisor bullet 1",
+      "note": "Practical process improvement; no formal Lean training."
+    },
+    {
+      "req": "Experience managing a labor budget (nice to have)",
+      "status": "gap",
+      "where": "",
+      "note": "Not part of past roles. Interested in learning it."
+    },
+    {
+      "req": "Bachelor degree in supply chain, business or a related field (nice to have)",
+      "status": "gap",
+      "where": "",
+      "note": "High school diploma. Listed as nice to have, not required."
+    }
+  ],
+  "posting": "Operations Manager - Distribution Center\nLarkspur Outdoor Supply - Fairmont Junction, OH (on-site)\n$62,000 - $70,000 per year\n\nAbout us\nLarkspur Outdoor Supply sells camping, hiking and paddling gear online and through 12 retail stores. Our Fairmont Junction distribution center opened in 2023 and ships to stores and directly to customers.\n\nAbout the role\nThe Operations Manager leads day-to-day operations in our distribution center. You will lead two shift supervisors and a team of about 45 associates across receiving, inventory, picking, packing and shipping. You will improve our processes as we grow, and you will have the chance to grow into a site leadership role.\n\nWhat you will do\n- Lead daily operations to meet shipping deadlines for stores and online orders\n- Own inventory accuracy, including cycle count programs and root cause investigation\n- Build and adjust staffing schedules to match volume\n- Train and develop shift supervisors and associates\n- Lead safety programs and make sure we follow OSHA requirements\n- Track labor costs and productivity, and help prepare the annual labor budget\n- Find and lead continuous improvement projects\n- Work with purchasing, customer service and store teams\n\nWhat you bring\n- 5+ years of experience in a warehouse or distribution center\n- 2+ years supervising hourly teams\n- Experience with a warehouse management system (WMS)\n- Strong record of improving inventory accuracy\n- Experience training and coaching others\n- Working knowledge of OSHA requirements; forklift experience a plus\n- Comfortable with Excel or Google Sheets\n\nNice to have\n- Experience with Lean or other continuous improvement methods\n- Experience managing a labor budget\n- Bachelor's degree in supply chain, business or a related field\n\nSchedule\nMonday to Friday, day shift. Rotating Saturday coverage during peak season (October to December). Occasionally on call for after-hours issues.\n\nBenefits\nHealth, dental and vision insurance, 401(k) with company match, paid time off, employee discount.",
+  "letter": {
+    "greeting": "Dear Hiring Team,",
+    "body": [
+      "I am applying for the Operations Manager position at the Larkspur Outdoor Supply distribution center in Fairmont Junction. For the past seven years I ran second shift at Cedar Ridge Distribution, a regional center that shipped to 40 stores, until the site closed in August when the company combined two warehouses.",
+      "Your posting puts inventory accuracy first. At Cedar Ridge, store orders were going out short because our records did not match the shelves. I spent two weeks watching how each shift received freight, found that every shift did it differently, and wrote a one-page receiving checklist. I trained six receivers to use it, and within six months discrepancies were down about 40%. The checklist became standard on all three shifts.",
+      "You also want new team members to become productive quickly. I was the main trainer on our receiving dock and trained about 30 new associates over four years, working beside each person on their first shifts so they learned by doing. During peak season I built the schedule two weeks ahead and cross-trained loaders on picking, and no store missed a delivery day from my shift in 2024 or 2025.",
+      "I have not yet owned a budget, and I would welcome learning that part of the role. I would be glad to talk about how I could help Larkspur keep its distribution center running smoothly as it grows."
+    ],
+    "closing": "Sincerely,"
+  }
+}
